@@ -1,1 +1,1 @@
-# eventual-consensus-simulation
+# approximate-consensus-simulation
