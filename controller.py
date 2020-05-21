@@ -1,9 +1,10 @@
 import json
-import socket
+import logging
 import pickle
+import socket
+import sys
 import threading
 import time
-import sys
 
 from numpy import random
 
@@ -32,13 +33,18 @@ def get_wait_time(shape=3, scale=2):
     return random.gamma(shape, scale)
 
 
-def downed_server(ip):
+def downed_server(ip, server_id):
     global params
     controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     controllerSendSocket.bind((ip, params["controller_port"]))
     controllerSendSocket.listen(1)
+
+    logging.info(f"Controller is waiting for connection from {ip}")
+
     connection, client_address = controllerSendSocket.accept()
+
+    logging.info(f"Controller established connection with {ip}")
 
     wait_time = get_wait_time()
     time.sleep(wait_time + 2)
@@ -46,6 +52,10 @@ def downed_server(ip):
     assert len(message) < 1024
     connection.sendall(message)
     connection.close()
+
+    doneServers[server_id] = True
+
+    logging.info(f"Controller sent permanent downed command to {ip}")
 
     return True
 
@@ -65,6 +75,7 @@ def unreliable_server(ip, server_id):
 
         isByzantine = random.rand() < params["byzantine_p"]
         if isByzantine:
+            logging.info(f"Controller sent byzantine command to {ip}")
             message = format_message(isByzantine, False)
             assert len(message) < 1024
             controllerSendSocket.sendto(message, (ip, params["controller_port"]))
@@ -73,6 +84,7 @@ def unreliable_server(ip, server_id):
             time.sleep(wait_time)
 
             isDown = not isDown
+            logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
             message = format_message(isByzantine, isDown)
             assert len(message) < 1024
             controllerSendSocket.sendto(message, (ip, params["controller_port"]))
@@ -89,6 +101,9 @@ def process_server_states():
     while True:
         data, ip = controllerListenSocket.recv(1024)
         message = json.loads(data.decode('utf-8'))
+
+        logging.info(f"Controller received state update from {message['id']}")
+
         serverStates[message["id"]].append(message)
         if message["done"]:
             doneServers[message["id"]] = True
@@ -99,6 +114,9 @@ def process_server_states():
 
 
 if __name__ == "__main__":
+
+    logging.info(f"Controller is starting")
+
     controllerListener = threading.Thread(target=process_server_states)
     controllerListener.start()
 
@@ -106,7 +124,7 @@ if __name__ == "__main__":
         ip = params["server_ips"][i]
 
         if ip in downedServers:
-            controller = threading.Thread(target=downed_server, args=(ip,))
+            controller = threading.Thread(target=downed_server, args=(ip, i))
             controller.start()
 
         else:
@@ -125,3 +143,5 @@ if __name__ == "__main__":
                 "params": params,
             }, fh
         )
+
+    logging.info("Controller is finished")

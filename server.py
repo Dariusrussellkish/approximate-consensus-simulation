@@ -1,4 +1,5 @@
 import json
+import logging
 import socket
 import sys
 import threading
@@ -65,6 +66,7 @@ def periodic_broadcast():
                 break
             message = format_message()
             assert len(message) < 1024
+            logging.info(f"Server {serverID} is broadcasting and isByzantine is {isByzantine}")
             if not isDown and not isByzantine:
                 bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
             elif not isDown and isByzantine:
@@ -80,10 +82,11 @@ def periodic_broadcast():
 
 
 def process_message():
-    global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, controllerSocket
+    global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, controllerSocket, serverID
     while True:
         data, addr = bcastListenSocket.recvfrom(1024)
         message = json.loads(data.decode('utf-8'))
+        logging.info(f"Server {serverID} received broadcast from {message['id']}")
         if message["id"] == serverID:
             continue
         atomic_variable_lock.acquire()
@@ -107,6 +110,7 @@ def process_message():
             if updated:
                 message = format_message()
                 assert len(message) < 1024
+                logging.info(f"Server {serverID} is sending state update to server")
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
                 if p > p_end:
@@ -120,12 +124,16 @@ def process_message():
 
 
 def process_controller_messages():
-    global isDown, isByzantine, isDone, controllerListenSocket
+    global isDown, isByzantine, isDone, controllerListenSocket, serverID
     controllerListenSocket.connect((params["controller_ip"], params["controller_port"]))
+
+    logging.info(f"Server {serverID} connected to controller")
 
     while True:
         data, addr = controllerListenSocket.recvfrom(1024)
         message = json.loads(data.decode('utf-8'))
+        logging.info(f"Server {serverID} received state update from controller")
+
         atomic_variable_lock.acquire()
         try:
             if isDone:
@@ -140,6 +148,9 @@ def process_controller_messages():
 
 
 if __name__ == "__main__":
+
+    logging.info(f"Server {serverID} is beginning simulation")
+
     serverBCast = threading.Thread(target=periodic_broadcast)
     serverBCast.start()
 
@@ -157,3 +168,5 @@ if __name__ == "__main__":
     message = format_message()
     assert len(message) < 1024
     controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+
+    logging.info(f"Server {serverID} finished")

@@ -1,14 +1,11 @@
-from mininet.topo import Topo
-from mininet.net import Mininet
-from mininet.node import Host
-from mininet.link import TCLink
-from mininet.util import dumpNodeConnections
-from mininet.log import setLogLevel
-from mininet.cli import CLI
-
-import sys
 import json
-from functools import partial
+import sys
+
+from mininet.cli import CLI
+from mininet.log import setLogLevel
+from mininet.net import Mininet
+from mininet.topo import Topo
+from mininet.util import dumpNodeConnections
 
 
 class SimulationTopo(Topo):
@@ -53,9 +50,13 @@ def start_simulation(hs):
     with open(sys.argv[1], 'r') as fh:
         params = json.load(fh)
 
+    print
+    "Starting controller on ip: " + hs[-1].IP
     hs[-1].cmd("python3 controller.py " + sys.argv[1])
 
     for i in range(params["servers"]):
+        print
+        "Starting server " + str(i) + " on ip: " + hs[i].IP
         hs[i].cmd("python3 server.py " + sys.argv[1] + " " + str(i))
 
 
