@@ -4,6 +4,7 @@ import socket
 import sys
 import threading
 import time
+import os
 
 from numpy import random, log
 
@@ -32,6 +33,9 @@ R = list([0 for _ in range(nServers)])
 isByzantine = False
 isDown = False
 isDone = False
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
 logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.DEBUG)
 

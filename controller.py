@@ -5,8 +5,12 @@ import socket
 import sys
 import threading
 import time
+import os
 
 from numpy import random
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
 logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG)
 
@@ -98,7 +102,7 @@ def process_server_states():
     global params, serverStates
     controllerListenSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)  # UDP
     controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    controllerListenSocket.bind(("", params["controller_socket"]))
+    controllerListenSocket.bind(("", params["controller_port"]))
 
     while True:
         data, ip = controllerListenSocket.recv(1024)
