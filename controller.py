@@ -8,6 +8,8 @@ import time
 
 from numpy import random
 
+logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG)
+
 with open(sys.argv[1], 'r') as fh:
     params = json.load(fh)
 

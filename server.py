@@ -33,6 +33,8 @@ isByzantine = False
 isDown = False
 isDone = False
 
+logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.DEBUG)
+
 atomic_variable_lock = threading.Lock()
 
 r = (3 * params["servers"] - 2 * params["f"]) / (4 * (params["servers"] - params["f"]))

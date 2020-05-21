@@ -52,7 +52,7 @@ def start_simulation(hs):
         params = json.load(fh)
 
     print
-    "Starting controller on ip: " + hs[-1].IP
+    "Starting controller on ip: " + str(hs[-1].IP)
     hs[-1].cmd("python3 controller.py " + sys.argv[1])
 
     for i in range(params["servers"]):
