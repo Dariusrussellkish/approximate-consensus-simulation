@@ -1,5 +1,6 @@
 import json
 import sys
+from os import system
 
 from mininet.cli import CLI
 from mininet.log import setLogLevel
@@ -61,6 +62,7 @@ def start_simulation(hs):
 
 
 if __name__ == "__main__":
+    system("mn --clean")
     net, hs = start_mini()
     start_simulation(hs)
     CLI(net)
