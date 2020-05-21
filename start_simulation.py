@@ -52,11 +52,11 @@ def start_simulation(hs):
         params = json.load(fh)
 
     print "Starting controller on ip: " + str(hs[-1].IP)
-    hs[-1].cmd("python3 controller.py " + sys.argv[1])
+    hs[-1].cmd("python3 ~/approximate-consensus-simulation/controller.py " + sys.argv[1])
 
     for i in range(params["servers"]):
         print "Starting server " + str(i) + " on ip: " + str(hs[i].IP)
-        hs[i].cmd("python3 server.py " + sys.argv[1] + " " + str(i))
+        hs[i].cmd("python3 ~/approximate-consensus-simulation/server.py " + sys.argv[1] + " " + str(i))
 
 
 if __name__ == "__main__":
