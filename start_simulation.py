@@ -53,10 +53,10 @@ def start_simulation(hs):
     with open(sys.argv[1], 'r') as fh:
         params = json.load(fh)
 
-    hs[-1].cmd(f"python3 controller.py {sys.argv[1]}")
+    hs[-1].cmd("python3 controller.py " + sys.argv[1])
 
     for i in range(params["servers"]):
-        hs[i].cmd(f"python3 server.py {sys.argv[1]} {i}")
+        hs[i].cmd("python3 server.py " + sys.argv[1] + " " + str(i))
 
 
 if __name__ == "__main__":
