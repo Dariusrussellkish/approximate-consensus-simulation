@@ -1,0 +1,19 @@
+{
+  "servers": 5,
+  "server_ips": [
+    "10.0.0.1",
+    "10.0.0.2",
+    "10.0.0.3",
+    "10.0.0.4",
+    "10.0.0.5"
+  ],
+  "f": 4,
+  "K": 25,
+  "controller_ip": "10.0.0.6",
+  "server_port": "37020",
+  "controller_port": "37021",
+  "byzantine_send_p": 0.5,
+  "byzantine_p": 0.5,
+  "eps": 0.1,
+  "broadcast_period": 100
+}
