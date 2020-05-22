@@ -109,6 +109,9 @@ def unreliable_server(ip, server_id, byzantine, connection):
         doneServersLock.acquire()
         try:
             if doneServers[server_id]:
+                message = format_message(isByzantine, False)
+                assert len(message) <= 1024
+                connection.sendall(message)
                 break
         finally:
             doneServersLock.release()
