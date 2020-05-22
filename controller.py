@@ -168,14 +168,14 @@ if __name__ == "__main__":
 
         logging.info(f"Controller will wait for servers to connect")
 
+        controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        controllerSendSocket.bind(("0.0.0.0", params["controller_port"]))
+        controllerSendSocket.listen(1)
+
         # waits for all servers to connect before beginning simulation
         sockets = {}
         for i in range(params["servers"]):
-            controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-            controllerSendSocket.bind(("0.0.0.0", params["controller_port"]))
-            controllerSendSocket.listen(1)
-
             logging.info(f"Controller is waiting for connection")
 
             connection, client_address = controllerSendSocket.accept()
