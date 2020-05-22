@@ -9,6 +9,8 @@ import os
 
 from numpy import random
 
+doneServersLock = threading.Lock()
+
 # ensure logs directory exists
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -84,8 +86,11 @@ def downed_server(ip, server_id, connection):
     connection.sendall(message)
     connection.close()
 
-    doneServers[server_id] = True
-
+    doneServersLock.acquire()
+    try:
+        doneServers[server_id] = True
+    finally:
+        doneServersLock.release()
     logging.info(f"Controller sent permanent downed command to {ip}")
 
     return True
@@ -101,11 +106,11 @@ def unreliable_server(ip, server_id, byzantine, connection):
     isByzantine = False
 
     while True:
+        doneServersLock.acquire()
+        try:
+            if doneServers[server_id]:
+                break
 
-        if doneServers[server_id]:
-            break
-
-        for _ in range(2):
             wait_time = get_wait_time()
             time.sleep(wait_time)
 
@@ -121,6 +126,9 @@ def unreliable_server(ip, server_id, byzantine, connection):
             assert len(message) <= 1024
             connection.sendall(message)
 
+        finally:
+            doneServersLock.release()
+
     connection.close()
     return True
 
@@ -133,6 +141,8 @@ def process_server_states():
     controllerListenSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)  # UDP
     controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     controllerListenSocket.bind(("", params["controller_port"]))
+
+    isControllerDone = False
 
     while True:
         data, ip = controllerListenSocket.recvfrom(1024)
@@ -148,18 +158,26 @@ def process_server_states():
 
         serverStates[message["id"]].append(message)
 
-        if message["done"]:
-            doneServers[message["id"]] = True
+        doneServersLock.acquire()
+        try:
+            if isControllerDone:
+                break
 
-        # check if all the servers are done (or permanently down)
-        if all(doneServers):
-            for ip in params["server_ips"]:
-                if ip not in downedServers:
-                    # send crash command to server, which will make it end
-                    connection = sockets[ip]
-                    message = format_message(False, True, isPermanent=True)
-                    connection.sendall(message)
-            break
+            if message["done"]:
+                doneServers[message["id"]] = True
+
+            # check if all the servers are done (or permanently down)
+            if all(doneServers):
+                for ip in params["server_ips"]:
+                    if ip not in downedServers:
+                        # send crash command to server, which will make it end
+                        connection = sockets[ip]
+                        message = format_message(False, True, isPermanent=True)
+                        connection.sendall(message)
+                isControllerDone = True
+        finally:
+            doneServersLock.release()
+        controllerListenSocket.close()
     return True
 
 
