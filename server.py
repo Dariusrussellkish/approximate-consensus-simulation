@@ -125,12 +125,11 @@ def process_message():
         if message["id"] == serverID:
             continue
 
-        logging.info(f"Server {serverID} received broadcast from {message['id']}")
+        logging.info(f"Server {serverID} received broadcast from {message['id']}, {message}")
 
         atomic_variable_lock.acquire()
 
         try:
-
             # skip if we are down
             if isDown:
                 logging.info(f"Server {serverID} is down, skipping")
