@@ -68,6 +68,8 @@ def start_simulation(hs):
                 print(f"Simulation {i} finished")
                 break
             time.sleep(0.5)
+    print("Done, now cleaning system")
+    system("mn --clean")
 
 
 if __name__ == "__main__":
