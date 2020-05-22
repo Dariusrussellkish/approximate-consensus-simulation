@@ -8,6 +8,16 @@ import os
 
 from numpy import random, log
 
+# General control flow for a server:
+# - It begins in state DOWN and waits until the controller sends
+#   all servers the UP command to start the simulation
+# - Periodically broadcasts state to all servers if it is up. Only some servers if Byzantine
+# - Processes incoming messages from servers if not down
+#   - if p > p_end, we tell the controller we are done, but keep broadcasting and processing
+# - Process state commands from the controller, UP, DOWN, BYZANTINE, and CRASH
+#   - if we crash, we tell all threads we are done, they join, and we tell the controller
+#     we are exiting.The controller ends the simulation when all servers are done by crashing them.
+
 # set up sockets to use
 bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 controllerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -164,11 +174,11 @@ def process_message():
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
-                # let the controller know we are done
-                if p > p_end:
-                    message = format_message(finished=True)
-                    assert len(message) <= 1024
-                    controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+            # let the controller know we are done
+            if p > p_end:
+                message = format_message(finished=True)
+                assert len(message) <= 1024
+                controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
         finally:
             atomic_variable_lock.release()

@@ -147,6 +147,7 @@ def process_server_states():
         logging.info(f"Controller received state update from {message['id']}")
 
         serverStates[message["id"]].append(message)
+
         if message["done"]:
             doneServers[message["id"]] = True
 
