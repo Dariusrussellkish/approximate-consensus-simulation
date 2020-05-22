@@ -109,6 +109,7 @@ def unreliable_server(ip, server_id, byzantine, connection):
         doneServersLock.acquire()
         try:
             if doneServers[server_id]:
+                # ensure the server is up before ending UP/DOWN broadcasts
                 message = format_message(isByzantine, False)
                 assert len(message) <= 1024
                 connection.sendall(message)
@@ -172,6 +173,7 @@ def process_server_states():
                         connection = sockets[ip]
                         message = format_message(False, True, isPermanent=True)
                         connection.sendall(message)
+                break
         finally:
             doneServersLock.release()
 

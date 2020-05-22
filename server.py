@@ -138,10 +138,12 @@ def process_message():
                 break
         finally:
             atomic_variable_lock.release()
-
-        data, addr = bcastListenSocket.recvfrom(1024)
-        message = json.loads(data.decode('utf-8'))
-
+        try:
+            bcastListenSocket.settimeout(1)
+            data, addr = bcastListenSocket.recvfrom(1024)
+            message = json.loads(data.decode('utf-8'))
+        except socket.timeout:
+            continue
         # if we pick up our own messages, don't listen
         if message["id"] == serverID:
             continue
