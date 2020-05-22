@@ -30,8 +30,8 @@ with open(sys.argv[1], 'r') as fh:
 serverID = int(sys.argv[2])
 K = params["K"]
 nServers = int(params["servers"])
-v = random.randint(0, K + 1)
-p = 0
+v = float(random.randint(0, K + 1))
+p = 0.
 R = list([0 for _ in range(nServers)])
 isByzantine = False
 isDown = True
@@ -134,18 +134,18 @@ def process_message():
                 continue
 
             updated = False
-            if message["p"] > p:
+            if float(message["p"]) > float(p):
                 logging.info(f"Server {serverID} accepting jump update from {message['id']}")
-                v = message["v"]
-                p = message["p"]
+                v = float(message["v"])
+                p = float(message["p"])
                 R = list([0 for _ in range(nServers)])
                 updated = True
             elif message["p"] == p and R[int(message["id"])] != 1:
                 R[int(message["id"])] = 1
-                if sum(R) >= params["servers"] - params["f"]:
+                if sum(R) >= int(params["servers"]) - int(params["f"]):
                     logging.info(f"Server {serverID} accepting consensus update")
-                    v = v / float(sum(R))
-                    p += 1
+                    v = float(v) / float(sum(R))
+                    p += 1.
                     updated = True
 
             # send update to controller if we changed state
