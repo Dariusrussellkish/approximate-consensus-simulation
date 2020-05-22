@@ -170,7 +170,7 @@ if __name__ == "__main__":
             ip = params["server_ips"][i]
             controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-            controllerSendSocket.bind((ip, params["controller_port"]))
+            controllerSendSocket.bind(("localhost", params["controller_port"]))
             controllerSendSocket.listen(1)
 
             logging.info(f"Controller is waiting for connection from {ip}")
