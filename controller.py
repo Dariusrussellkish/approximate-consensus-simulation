@@ -13,8 +13,8 @@ from numpy import random
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG, filemode='w')
-# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+# logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG, filemode='w')
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # load in parameters
 with open(sys.argv[1], 'r') as fh:
