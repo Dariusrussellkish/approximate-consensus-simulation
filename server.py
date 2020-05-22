@@ -200,25 +200,28 @@ def process_controller_messages():
 
 
 if __name__ == "__main__":
+    try:
+        logging.info(f"Server {serverID} is beginning simulation")
 
-    logging.info(f"Server {serverID} is beginning simulation")
+        serverBCast = threading.Thread(target=periodic_broadcast)
+        serverBCast.start()
 
-    serverBCast = threading.Thread(target=periodic_broadcast)
-    serverBCast.start()
+        messageProcessor = threading.Thread(target=process_message)
+        messageProcessor.start()
 
-    messageProcessor = threading.Thread(target=process_message)
-    messageProcessor.start()
+        controllerListener = threading.Thread(target=process_controller_messages)
+        controllerListener.start()
 
-    controllerListener = threading.Thread(target=process_controller_messages)
-    controllerListener.start()
+        main_thread = threading.currentThread()
+        for t in threading.enumerate():
+            if t is not main_thread:
+                t.join()
 
-    main_thread = threading.currentThread()
-    for t in threading.enumerate():
-        if t is not main_thread:
-            t.join()
+        message = format_message()
+        assert len(message) <= 1024
+        controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
-    message = format_message()
-    assert len(message) <= 1024
-    controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+        logging.info(f"Server {serverID} finished")
 
-    logging.info(f"Server {serverID} finished")
+    except:
+        logging.exception(f"Server {serverID} encountered error in main thread")

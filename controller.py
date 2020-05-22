@@ -156,64 +156,67 @@ if __name__ == "__main__":
 
     # TODO: refactor to make default state for servers DOWN, then wait for all connect TCP and send UP status and
     #  byzantine
+    try:
+        logging.info(f"Controller is starting")
 
-    logging.info(f"Controller is starting")
+        controllerListener = threading.Thread(target=process_server_states)
+        controllerListener.start()
 
-    controllerListener = threading.Thread(target=process_server_states)
-    controllerListener.start()
+        logging.info(f"Controller will wait for servers to connect")
 
-    logging.info(f"Controller will wait for servers to connect")
+        # waits for all servers to connect before beginning simulation
+        sockets = []
+        for i in range(params["servers"]):
+            ip = params["server_ips"][i]
+            controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            controllerSendSocket.bind((ip, params["controller_port"]))
+            controllerSendSocket.listen(1)
 
-    # waits for all servers to connect before beginning simulation
-    sockets = []
-    for i in range(params["servers"]):
-        ip = params["server_ips"][i]
-        controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        controllerSendSocket.bind((ip, params["controller_port"]))
-        controllerSendSocket.listen(1)
+            logging.info(f"Controller is waiting for connection from {ip}")
 
-        logging.info(f"Controller is waiting for connection from {ip}")
+            connection, client_address = controllerSendSocket.accept()
 
-        connection, client_address = controllerSendSocket.accept()
+            logging.info(f"Controller established connection with {ip}")
+            sockets.append(connection)
 
-        logging.info(f"Controller established connection with {ip}")
-        sockets.append(connection)
+        logging.info(f"Controller has connected to all servers")
 
-    logging.info(f"Controller has connected to all servers")
+        # send command to all servers to go up
+        for i in range(params["servers"]):
+            connection = sockets[i]
+            message = format_message(False, True)
+            connection.sendall(message)
 
-    # send command to all servers to go up
-    for i in range(params["servers"]):
-        connection = sockets[i]
-        message = format_message(False, True)
-        connection.sendall(message)
+        logging.info(f"Controller has started all servers")
 
-    logging.info(f"Controller has started all servers")
+        for i in range(params["servers"]):
+            ip = params["server_ips"][i]
 
-    for i in range(params["servers"]):
-        ip = params["server_ips"][i]
+            if ip in downedServers:
+                controller = threading.Thread(target=downed_server, args=(ip, i, sockets[i]))
+                controller.start()
+            elif ip in byzantineServers:
+                controller = threading.Thread(target=unreliable_server, args=(ip, i, True, sockets[i]))
+                controller.start()
+            else:
+                controller = threading.Thread(target=unreliable_server, args=(ip, i, False, sockets[i]))
+                controller.start()
 
-        if ip in downedServers:
-            controller = threading.Thread(target=downed_server, args=(ip, i, sockets[i]))
-            controller.start()
-        elif ip in byzantineServers:
-            controller = threading.Thread(target=unreliable_server, args=(ip, i, True, sockets[i]))
-            controller.start()
-        else:
-            controller = threading.Thread(target=unreliable_server, args=(ip, i, False, sockets[i]))
-            controller.start()
+        main_thread = threading.currentThread()
+        for t in threading.enumerate():
+            if t is not main_thread:
+                t.join()
 
-    main_thread = threading.currentThread()
-    for t in threading.enumerate():
-        if t is not main_thread:
-            t.join()
+        with open("simulation_output.pickle", 'wb') as fh:
+            pickle.dump(
+                {
+                    "serverStates": serverStates,
+                    "params": params,
+                }, fh
+            )
 
-    with open("simulation_output.pickle", 'wb') as fh:
-        pickle.dump(
-            {
-                "serverStates": serverStates,
-                "params": params,
-            }, fh
-        )
+        logging.info("Controller is finished")
 
-    logging.info("Controller is finished")
+    except:
+        logging.exception("Controller encountered error in main thread")
