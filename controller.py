@@ -158,6 +158,7 @@ def process_server_states():
         doneServersLock.acquire()
         try:
             if message["done"]:
+                logging.info(f"Controller received DONE from {message['id']}, done servers are {doneServers}")
                 doneServers[message["id"]] = True
 
             # check if all the servers are done (or permanently down)
