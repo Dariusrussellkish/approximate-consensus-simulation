@@ -57,7 +57,7 @@ bcastListenSocket.bind(("", params["server_port"]))
 # controllerListenSocket.bind((params["controller_ip"], params["controller_port"]))
 
 
-def format_message():
+def format_message(finished=False):
     """
     Formats internal state into utf-8 encoded JSON for sending over network
 
@@ -71,7 +71,7 @@ def format_message():
             "v": v,
             "p": p,
             "time": time.time_ns(),
-            "done": isDone,
+            "done": isDone or finished,
             "isDown": isDown,
             "isByzantine": isByzantine,
         }
@@ -162,6 +162,11 @@ def process_message():
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
+                if p > p_end:
+                    message = format_message(finished=True)
+                    assert len(message) <= 1024
+                    controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+
         finally:
             atomic_variable_lock.release()
 
@@ -220,10 +225,6 @@ if __name__ == "__main__":
         for t in threading.enumerate():
             if t is not main_thread:
                 t.join()
-
-        message = format_message()
-        assert len(message) <= 1024
-        controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
         logging.info(f"Server {serverID} finished")
 
