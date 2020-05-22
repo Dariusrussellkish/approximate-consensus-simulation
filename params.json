@@ -13,7 +13,7 @@
   "server_port": 37020,
   "controller_port": 37021,
   "byzantine_send_p": 0.5,
-  "byzantine_p": -1,
+  "byzantine_p": 0.1,
   "eps": 0.1,
   "broadcast_period": 100
 }
