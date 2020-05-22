@@ -126,7 +126,7 @@ def process_message():
             continue
 
         atomic_variable_lock.acquire()
-        logging.info(f"Server {serverID} {(v, p)} received broadcast from {message['id']}: {(message['v'], message['p'])}")
+        logging.info(f"Server {serverID} {(v, p)}, R: {R} received broadcast from {message['id']}: {(message['v'], message['p'])}")
         try:
             # skip if we are down
             if isDown:
@@ -142,7 +142,9 @@ def process_message():
                 updated = True
             elif message["p"] == p and R[int(message["id"])] == 0:
                 R[int(message["id"])] = 1
-                if sum(R) >= int(params["servers"]) - int(params["f"]):
+                logging.info(f"Server {serverID} updating R: {R}")
+
+            if sum(R) >= int(params["servers"]) - int(params["f"]):
                     logging.info(f"Server {serverID} accepting consensus update")
                     v = float(v) / float(sum(R))
                     p += 1
