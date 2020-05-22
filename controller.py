@@ -37,8 +37,8 @@ downedServers = random.choice(servers, params["f"], replace=False)
 logging.info(f"Downed servers are: {downedServers}")
 notDownedServers = list(set(servers) - set(downedServers))
 logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
-# byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDownedServers) + 1), replace=False)
-byzantineServers = []
+byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDownedServers) + 1), replace=False)
+# byzantineServers = []
 logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 sockets = {}
@@ -110,24 +110,23 @@ def unreliable_server(ip, server_id, byzantine, connection):
         try:
             if doneServers[server_id]:
                 break
-
-            wait_time = get_wait_time()
-            time.sleep(wait_time)
-
-            isDown = not isDown
-            logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
-            if byzantine and not isByzantine:
-                isByzantine = random.rand() < params["byzantine_p"]
-                message = format_message(True, isDown)
-            elif isByzantine:
-                message = format_message(True, isDown)
-            else:
-                message = format_message(False, isDown)
-            assert len(message) <= 1024
-            connection.sendall(message)
-
         finally:
             doneServersLock.release()
+
+        wait_time = get_wait_time()
+        time.sleep(wait_time)
+
+        isDown = not isDown
+        logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
+        if byzantine and not isByzantine:
+            isByzantine = random.rand() < params["byzantine_p"]
+            message = format_message(True, isDown)
+        elif isByzantine:
+            message = format_message(True, isDown)
+        else:
+            message = format_message(False, isDown)
+        assert len(message) <= 1024
+        connection.sendall(message)
 
     connection.close()
     return True
