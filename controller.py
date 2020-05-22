@@ -162,6 +162,8 @@ if __name__ == "__main__":
     controllerListener = threading.Thread(target=process_server_states)
     controllerListener.start()
 
+    logging.info(f"Controller will wait for servers to connect")
+
     # waits for all servers to connect before beginning simulation
     sockets = []
     for i in range(params["servers"]):
