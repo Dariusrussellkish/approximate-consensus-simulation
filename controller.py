@@ -142,8 +142,6 @@ def process_server_states():
     controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     controllerListenSocket.bind(("", params["controller_port"]))
 
-    isControllerDone = False
-
     while True:
         data, ip = controllerListenSocket.recvfrom(1024)
 
@@ -160,9 +158,6 @@ def process_server_states():
 
         doneServersLock.acquire()
         try:
-            if isControllerDone:
-                break
-
             if message["done"]:
                 doneServers[message["id"]] = True
 
@@ -174,7 +169,6 @@ def process_server_states():
                         connection = sockets[ip]
                         message = format_message(False, True, isPermanent=True)
                         connection.sendall(message)
-                isControllerDone = True
         finally:
             doneServersLock.release()
         controllerListenSocket.close()

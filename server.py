@@ -132,6 +132,13 @@ def process_message():
     """
     global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, controllerSocket, serverID, bcastSocket
     while True:
+        atomic_variable_lock.acquire()
+        try:
+            if isDone:
+                break
+        finally:
+            atomic_variable_lock.release()
+
         data, addr = bcastListenSocket.recvfrom(1024)
         message = json.loads(data.decode('utf-8'))
 
@@ -243,10 +250,10 @@ if __name__ == "__main__":
             if t is not main_thread:
                 t.join()
 
-        # Tell the controller we are done in the case of a permanent failure
-        message = format_message(finished=True)
-        assert len(message) <= 1024
-        controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+        # # Tell the controller we are done in the case of a permanent failure
+        # message = format_message(finished=True)
+        # assert len(message) <= 1024
+        # controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
         logging.info(f"Server {serverID} finished")
 
