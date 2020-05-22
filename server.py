@@ -33,6 +33,7 @@ nServers = int(params["servers"])
 v = float(random.randint(0, K + 1))
 p = 0
 R = list([0 for _ in range(nServers)])
+R[serverID] = 1
 isByzantine = False
 isDown = True
 isDone = False
@@ -139,6 +140,7 @@ def process_message():
                 v = float(message["v"])
                 p = message["p"]
                 R = list([0 for _ in range(nServers)])
+                R[serverID] = 1
                 updated = True
             elif message["p"] == p and R[int(message["id"])] == 0:
                 R[int(message["id"])] = 1
