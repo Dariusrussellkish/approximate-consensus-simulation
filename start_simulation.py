@@ -63,6 +63,7 @@ def start_simulation(hs):
 
         while True:
             result = hs[-1].cmd(f"ps -fe | grep controller")
+            print(result)
             if "controller" not in result:
                 print(f"Simulation {i} finished")
                 break
