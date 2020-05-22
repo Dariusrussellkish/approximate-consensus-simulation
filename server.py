@@ -201,6 +201,7 @@ def process_controller_messages():
 
 if __name__ == "__main__":
     try:
+        time.sleep(1)
         logging.info(f"Server {serverID} is beginning simulation")
 
         serverBCast = threading.Thread(target=periodic_broadcast)
