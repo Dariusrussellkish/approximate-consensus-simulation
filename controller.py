@@ -6,6 +6,7 @@ import sys
 import threading
 import time
 import os
+import uuid
 
 from numpy import random
 
@@ -236,7 +237,12 @@ if __name__ == "__main__":
             if t is not main_thread:
                 t.join()
 
-        with open("simulation_output.pickle", 'wb') as fh:
+        basepath = f"nServers_{params['servers']}_f_{params['f']}_eps_{params['eps']}_byzantineP_{params['byzantine_p']}_bcastPeriod_{params['broadcast_period']}"
+        # ensure basepath directory exists
+        if not os.path.exists(basepath):
+            os.makedirs(basepath)
+        unique = uuid.uuid4().hex
+        with open(f"{basepath}/{unique}.pickle", 'wb') as fh:
             pickle.dump(
                 {
                     "serverStates": serverStates,

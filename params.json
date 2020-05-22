@@ -15,5 +15,6 @@
   "byzantine_send_p": 0.5,
   "byzantine_p": 0.1,
   "eps": 0.1,
-  "broadcast_period": 100
+  "broadcast_period": 100,
+  "n_simulations" : 100
 }

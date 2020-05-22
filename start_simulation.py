@@ -1,5 +1,6 @@
 import json
 import sys
+import time
 from os import system
 
 from mininet.cli import CLI
@@ -51,12 +52,21 @@ def start_simulation(hs):
     with open(sys.argv[1], 'r') as fh:
         params = json.load(fh)
 
-    print "Starting controller on ip: " + str(hs[-1].IP)
-    hs[-1].cmd("python3 ~/approximate-consensus-simulation/controller.py " + sys.argv[1])
+    for i in range(params["n_simulations"]):
+        print(f"Starting simulation {i}")
+        print(f"Starting controller on ip: {hs[-1].IP}")
+        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
 
-    for i in range(params["servers"]):
-        print "Starting server " + str(i) + " on ip: " + str(hs[i].IP)
-        hs[i].cmd("python3 ~/approximate-consensus-simulation/server.py " + sys.argv[1] + " " + str(i))
+        for i in range(params["servers"]):
+            print(f"Starting server {i} on ip: {hs[i].IP}")
+            hs[i].cmd(f"python3 ~/approximate-consensus-simulation/server.py {sys.argv[1]} {i} &")
+
+        while True:
+            result = hs[-1].cmd(f"ps -fe | grep controller")
+            if "controller" not in result:
+                print(f"Simulation {i} finished")
+                break
+            time.sleep(0.5)
 
 
 if __name__ == "__main__":
