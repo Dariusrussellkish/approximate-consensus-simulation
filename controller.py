@@ -25,10 +25,6 @@ serverStates = {}
 for i in range(params["servers"]):
     serverStates[i] = []
 
-# upServers = {}
-# for ip in params["server_ips"]:
-#     upServers[ip] = False
-
 doneServers = [False for _ in range(params["servers"])]
 
 logging.info(f"Server IPs are {set(params['server_ips'])}")
@@ -145,7 +141,6 @@ def process_server_states():
 
         # in some testing the server also picks up the UP/DOWN messages
         # so this filters them out (if server and controller share IP)
-
         if "id" not in message:
             continue
 
@@ -155,9 +150,11 @@ def process_server_states():
         if message["done"]:
             doneServers[message["id"]] = True
 
+        # check if all the servers are done (or permanently down)
         if all(doneServers):
             for ip in params["server_ips"]:
                 if ip not in downedServers:
+                    # send crash command to server, which will make it end
                     connection = sockets[ip]
                     message = format_message(False, True, isPermanent=True)
                     connection.sendall(message)

@@ -87,6 +87,7 @@ def periodic_broadcast():
         atomic_variable_lock.acquire()
         try:
             # TODO: this might be refactorable to while not isDone
+
             # break out of the infinite loop if the server is done
             if isDone:
                 break
@@ -123,6 +124,7 @@ def process_message():
         data, addr = bcastListenSocket.recvfrom(1024)
         message = json.loads(data.decode('utf-8'))
 
+        # if we pick up our own messages, don't listen
         if message["id"] == serverID:
             continue
 
@@ -162,6 +164,7 @@ def process_message():
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
+                # let the controller know we are done
                 if p > p_end:
                     message = format_message(finished=True)
                     assert len(message) <= 1024
@@ -193,10 +196,10 @@ def process_controller_messages():
 
         atomic_variable_lock.acquire()
         try:
+            # once we get the permanent down command, set isDone to true and end all threads
             if message["isPermanent"]:
                 isDown = message["isDown"]
                 isDone = True
-            if isDone:
                 break
             isDown = message["isDown"]
             isByzantine = message["isByzantine"]
@@ -226,6 +229,7 @@ if __name__ == "__main__":
             if t is not main_thread:
                 t.join()
 
+        # Tell the controller we are done in the case of a permanent failure
         message = format_message(finished=True)
         assert len(message) <= 1024
         controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
