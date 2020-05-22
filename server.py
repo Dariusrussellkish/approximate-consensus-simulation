@@ -189,6 +189,9 @@ def process_controller_messages():
 
         atomic_variable_lock.acquire()
         try:
+            if message["isPermanent"]:
+                isDown = message["isDown"]
+                isDone = True
             if isDone:
                 break
             isDown = message["isDown"]

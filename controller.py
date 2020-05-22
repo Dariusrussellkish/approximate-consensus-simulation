@@ -44,7 +44,7 @@ byzantineServers = []
 logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 
-def format_message(isByzantine, isDown):
+def format_message(isByzantine, isDown, isPermanent=False):
     """
     Formats message to the server about state information
     :param isByzantine:
@@ -54,7 +54,8 @@ def format_message(isByzantine, isDown):
     return json.dumps(
         {
             "isDown": isDown,
-            "isByzantine": isByzantine
+            "isByzantine": isByzantine,
+            "isPermanent": isPermanent,
         }
     ).rjust(1024).encode('utf-8')
 
@@ -80,7 +81,7 @@ def downed_server(ip, server_id, connection):
 
     wait_time = get_wait_time()
     time.sleep(wait_time + 2)
-    message = format_message(False, True)
+    message = format_message(False, True, isPermanent=True)
     assert len(message) <= 1024
     connection.sendall(message)
     connection.close()
