@@ -67,7 +67,6 @@ def start_simulation():
 
         while True:
             result = hs[-1].cmd(f"ps -fe | grep controller")
-            print(result)
             if "python3 /root/approximate-consensus-simulation/controller.py" not in result:
                 print(f"Simulation {i} finished")
                 break
