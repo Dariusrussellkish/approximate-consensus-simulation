@@ -115,6 +115,8 @@ def unreliable_server(ip, server_id, byzantine, connection):
                 assert len(message) <= 1024
                 connection.sendall(message)
                 break
+        except socket.error as e:
+            break
         finally:
             doneServersLock.release()
 
@@ -148,6 +150,7 @@ def process_server_states():
 
     while True:
         data, ip = controllerListenSocket.recvfrom(1024)
+
 
         message = json.loads(data.decode('utf-8'))
 
