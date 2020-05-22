@@ -184,6 +184,7 @@ def process_message():
 
             # let the controller know we are done
             if p > p_end:
+                logging.info(f"Server {serverID} letting controller know they are done")
                 message = format_message(finished=True)
                 assert len(message) <= 1024
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
