@@ -25,6 +25,10 @@ serverStates = {}
 for i in range(params["servers"]):
     serverStates[i] = []
 
+# upServers = {}
+# for ip in params["server_ips"]:
+#     upServers[ip] = False
+
 doneServers = [False for _ in range(params["servers"])]
 
 logging.info(f"Server IPs are {set(params['server_ips'])}")
@@ -165,20 +169,19 @@ if __name__ == "__main__":
         logging.info(f"Controller will wait for servers to connect")
 
         # waits for all servers to connect before beginning simulation
-        sockets = []
+        sockets = {}
         for i in range(params["servers"]):
-            ip = params["server_ips"][i]
             controllerSendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             controllerSendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-            controllerSendSocket.bind(("localhost", params["controller_port"]))
+            controllerSendSocket.bind(("0.0.0.0", params["controller_port"]))
             controllerSendSocket.listen(1)
 
-            logging.info(f"Controller is waiting for connection from {ip}")
+            logging.info(f"Controller is waiting for connection")
 
             connection, client_address = controllerSendSocket.accept()
 
-            logging.info(f"Controller established connection with {ip}")
-            sockets.append(connection)
+            logging.info(f"Controller established connection with {client_address}")
+            sockets[client_address] = connection
 
         logging.info(f"Controller has connected to all servers")
 
@@ -194,13 +197,13 @@ if __name__ == "__main__":
             ip = params["server_ips"][i]
 
             if ip in downedServers:
-                controller = threading.Thread(target=downed_server, args=(ip, i, sockets[i]))
+                controller = threading.Thread(target=downed_server, args=(ip, i, sockets[ip]))
                 controller.start()
             elif ip in byzantineServers:
-                controller = threading.Thread(target=unreliable_server, args=(ip, i, True, sockets[i]))
+                controller = threading.Thread(target=unreliable_server, args=(ip, i, True, sockets[ip]))
                 controller.start()
             else:
-                controller = threading.Thread(target=unreliable_server, args=(ip, i, False, sockets[i]))
+                controller = threading.Thread(target=unreliable_server, args=(ip, i, False, sockets[ip]))
                 controller.start()
 
         main_thread = threading.currentThread()
