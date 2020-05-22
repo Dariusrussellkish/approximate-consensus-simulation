@@ -188,7 +188,7 @@ def process_controller_messages():
             continue
         message = json.loads(data.decode('utf-8'))
         logging.info(f"Server {serverID} received state update from controller, now isDown is {message['isDown']}, "
-                     f"isByzantine is {message['isByzantine']}")
+                     f"isByzantine is {message['isByzantine']}, isPermanent is {message['isPermanent']}")
 
         atomic_variable_lock.acquire()
         try:
