@@ -170,7 +170,8 @@ def process_server_states():
                         connection.sendall(message)
         finally:
             doneServersLock.release()
-        controllerListenSocket.close()
+
+    controllerListenSocket.close()
     return True
 
 
