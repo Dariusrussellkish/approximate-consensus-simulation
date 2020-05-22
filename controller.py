@@ -181,7 +181,7 @@ if __name__ == "__main__":
             connection, client_address = controllerSendSocket.accept()
 
             logging.info(f"Controller established connection with {client_address}")
-            sockets[client_address] = connection
+            sockets[client_address[0]] = connection
 
         logging.info(f"Controller has connected to all servers")
 
