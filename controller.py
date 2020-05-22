@@ -39,7 +39,8 @@ downedServers = random.choice(servers, params["f"], replace=False)
 logging.info(f"Downed servers are: {downedServers}")
 notDownedServers = list(set(servers) - set(downedServers))
 logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
-byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDownedServers) + 1), replace=False)
+# byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDownedServers) + 1), replace=False)
+byzantineServers = []
 logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 
