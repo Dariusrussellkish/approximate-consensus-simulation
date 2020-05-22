@@ -186,8 +186,8 @@ if __name__ == "__main__":
         logging.info(f"Controller has connected to all servers")
 
         # send command to all servers to go up
-        for i in range(params["servers"]):
-            connection = sockets[i]
+        for ip in range(params["server_ips"]):
+            connection = sockets[ip]
             message = format_message(False, True)
             connection.sendall(message)
 
