@@ -226,6 +226,10 @@ if __name__ == "__main__":
             if t is not main_thread:
                 t.join()
 
+        message = format_message(finished=True)
+        assert len(message) <= 1024
+        controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+
         logging.info(f"Server {serverID} finished")
 
     except:

@@ -45,6 +45,7 @@ logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 sockets = {}
 
+
 def format_message(isByzantine, isDown, isPermanent=False):
     """
     Formats message to the server about state information
@@ -145,7 +146,7 @@ def process_server_states():
         # in some testing the server also picks up the UP/DOWN messages
         # so this filters them out (if server and controller share IP)
 
-        if not message.has_key("id"):
+        if "id" not in message:
             continue
 
         logging.info(f"Controller received state update from {message['id']}")
