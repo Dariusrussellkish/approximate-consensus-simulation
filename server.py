@@ -41,8 +41,8 @@ isDone = False
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-# logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.DEBUG, filemode='w')
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.DEBUG, filemode='w')
+# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # lock for atomic updates
 atomic_variable_lock = threading.Lock()
