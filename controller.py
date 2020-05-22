@@ -43,6 +43,7 @@ logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
 byzantineServers = []
 logging.info(f"Byzantine Servers are: {byzantineServers}")
 
+sockets = {}
 
 def format_message(isByzantine, isDown, isPermanent=False):
     """
@@ -154,6 +155,11 @@ def process_server_states():
             doneServers[message["id"]] = True
 
         if all(doneServers):
+            for ip in params["server_ips"]:
+                if ip not in downedServers:
+                    connection = sockets[ip]
+                    message = format_message(False, True, isPermanent=True)
+                    connection.sendall(message)
             break
     return True
 
@@ -176,7 +182,6 @@ if __name__ == "__main__":
         controllerSendSocket.listen(1)
 
         # waits for all servers to connect before beginning simulation
-        sockets = {}
         for i in range(params["servers"]):
             logging.info(f"Controller is waiting for connection")
 

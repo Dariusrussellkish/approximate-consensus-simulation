@@ -118,7 +118,7 @@ def process_message():
     """
     Process incoming messages from other servers
     """
-    global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, controllerSocket, serverID
+    global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, controllerSocket, serverID, bcastSocket
     while True:
         data, addr = bcastListenSocket.recvfrom(1024)
         message = json.loads(data.decode('utf-8'))
@@ -161,10 +161,6 @@ def process_message():
                 assert len(message) <= 1024
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
-
-                if p > p_end:
-                    isDone = True
-                    break
 
         finally:
             atomic_variable_lock.release()
