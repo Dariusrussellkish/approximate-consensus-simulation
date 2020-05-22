@@ -122,6 +122,7 @@ def periodic_broadcast():
 
         time.sleep(params["broadcast_period"] / 1000)
 
+    logging.info(f"Server {serverID} is exiting periodic_broadcast")
     return True
 
 
@@ -183,6 +184,7 @@ def process_message():
         finally:
             atomic_variable_lock.release()
 
+    logging.info(f"Server {serverID} is exiting process_message")
     return True
 
 
@@ -208,6 +210,7 @@ def process_controller_messages():
         try:
             # once we get the permanent down command, set isDone to true and end all threads
             if message["isPermanent"]:
+                logging.info(f"Server {serverID} received CRASH from controller")
                 isDown = message["isDown"]
                 isDone = True
                 break
@@ -216,6 +219,7 @@ def process_controller_messages():
         finally:
             atomic_variable_lock.release()
 
+    logging.info(f"Server {serverID} is exiting process_controller_messages")
     controllerListenSocket.close()
     return True
 
