@@ -37,7 +37,7 @@ for i in range(params["servers"]):
 
 doneServers = [False for _ in range(params["servers"])]
 
-params["server_ips"] = ["10.0.0." + str(i+3) for i in range(params['servers'])]
+params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
 logging.info(f"Server IPs are {set(params['server_ips'])}")
 
 # pick which servers will be down
@@ -105,7 +105,7 @@ def downed_server(ip, server_id, connection):
         assert len(message) <= 1024
         connection.sendall(message)
         connection.close()
-    
+
         doneServersLock.acquire()
         doneServers[server_id] = True
     except:
@@ -125,23 +125,26 @@ def unreliable_server(ip, server_id, byzantine, connection):
     try:
         isDown = False
         isByzantine = False
+        time_slept = 0
 
         while True:
-            doneServersLock.acquire()
-            try:
-                if doneServers[server_id]:
-                    # ensure the server is up before ending UP/DOWN broadcasts
-                    message = format_message(isByzantine, False)
-                    assert len(message) <= 1024
-                    connection.sendall(message)
-                    break
-            except socket.error as e:
-                break
-            finally:
-                doneServersLock.release()
-
             wait_time = get_wait_time(isDown)
-            time.sleep(wait_time)
+            while time_slept < wait_time:
+                doneServersLock.acquire()
+                try:
+                    if doneServers[server_id]:
+                        # ensure the server is up before ending UP/DOWN broadcasts
+                        message = format_message(isByzantine, False)
+                        assert len(message) <= 1024
+                        connection.sendall(message)
+                        break
+                except socket.error as e:
+                    break
+                finally:
+                    doneServersLock.release()
+                time.sleep(0.1)
+                time_slept += 0.1
+            time_slept = 0
 
             isDown = not isDown
             logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
