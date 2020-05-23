@@ -159,7 +159,7 @@ def process_message():
                 continue
 
             updated = False
-            if message["p"] > p:
+            if int(message["p"]) > int(p):
                 logging.info(f"Server {serverID} accepting jump update from {message['id']}")
                 v = float(message["v"])
                 p = int(message["p"])
