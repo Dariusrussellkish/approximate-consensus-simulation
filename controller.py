@@ -8,7 +8,7 @@ import time
 import os
 import uuid
 
-from numpy import random, interp
+from numpy import random, interp, log
 
 doneServersLock = threading.Lock()
 
@@ -25,7 +25,6 @@ with open(sys.argv[1], 'r') as fh:
     params = json.load(fh)
 
 rootLogger = logging.getLogger('')
-rootLogger.setLevel(logging.DEBUG)
 socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
                                                logging.handlers.DEFAULT_TCP_LOGGING_PORT)
 
@@ -51,6 +50,11 @@ byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDown
 logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 sockets = {}
+
+r = (3 * params["servers"] - 2 * params["f"]) / (4 * (params["servers"] - params["f"]))
+p_end = log(params["eps"] / params["K"]) / log(r)
+
+logging.info(f"Controller p_end is {p_end}")
 
 
 def format_message(isByzantine, isDown, isPermanent=False):

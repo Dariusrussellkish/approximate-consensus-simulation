@@ -43,7 +43,6 @@ logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.INFO, 
                     format='%(asctime)s %(levelname)-8s %(message)s')
 
 rootLogger = logging.getLogger('')
-rootLogger.setLevel(logging.DEBUG)
 socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
                                                logging.handlers.DEFAULT_TCP_LOGGING_PORT)
 
