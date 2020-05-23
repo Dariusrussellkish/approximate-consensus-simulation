@@ -39,7 +39,7 @@ def start_mini():
     net = Mininet(topo=topo)
     net.addNAT().configDefault()
     net.start()
-    net.pingAll()
+    # net.pingAll()
 
     hs = [net.get('h{0}'.format(i + 1)) for i in range(params["servers"] + 1)]
 
