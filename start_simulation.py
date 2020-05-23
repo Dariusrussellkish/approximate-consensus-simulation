@@ -58,7 +58,7 @@ def start_simulation():
         hs[-1].setIP(f"{params['logging_server_ip']}/24")
         print(f"Starting simulation {k}")
         print(f"Starting logging server on ip: {hs[-1].IP}")
-        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py > logs/logging_server.out 2>&1 &")
+        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py {sys.argv[1]} > logs/logging_server.out 2>&1 &")
 
         print(f"Starting controller on ip: {hs[0].IP}")
         hs[0].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} > logs/controller.out 2>&1 &")
