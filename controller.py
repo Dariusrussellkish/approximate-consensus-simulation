@@ -87,7 +87,7 @@ def downed_server(ip, server_id, connection):
     """
     global params
 
-    wait_time = get_wait_time(True)
+    wait_time = get_wait_time(False)
     time.sleep(wait_time + 2)
     message = format_message(False, True, isPermanent=True)
     assert len(message) <= 1024
