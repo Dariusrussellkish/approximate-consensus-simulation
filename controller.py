@@ -222,7 +222,7 @@ if __name__ == "__main__":
         # send command to all servers to go up
         for ip in params["server_ips"]:
             connection = sockets[ip]
-            message = format_message(False, True)
+            message = format_message(False, False)
             connection.sendall(message)
 
         logging.info(f"Controller has started all servers")
