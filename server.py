@@ -93,7 +93,7 @@ def periodic_broadcast():
             assert len(message) <= 1024
 
             if not isDown:
-                logging.info(f"Server {serverID} is broadcasting and isByzantine is {isByzantine}")
+                logging.debug(f"Server {serverID} is broadcasting and isByzantine is {isByzantine}")
             # if we are not byzantine or down, broadcast to all
             if not isDown and not isByzantine:
                 bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
