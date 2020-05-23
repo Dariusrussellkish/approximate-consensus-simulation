@@ -39,7 +39,8 @@ isDone = False
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.INFO, filemode='w')
+logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.INFO, filemode='w',
+                    format='%(asctime)s %(levelname)-8s %(message)s')
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # lock for atomic updates

@@ -16,7 +16,8 @@ doneServersLock = threading.Lock()
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG, filemode='w')
+logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG, filemode='w',
+                    format='%(asctime)s %(levelname)-8s %(message)s')
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # load in parameters
