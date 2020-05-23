@@ -125,9 +125,8 @@ def unreliable_server(ip, server_id, byzantine, connection):
     try:
         isDown = False
         isByzantine = False
-        time_slept = 0
-
         while True:
+            time_slept = 0
             wait_time = get_wait_time(isDown)
             while time_slept < wait_time:
                 doneServersLock.acquire()
@@ -144,7 +143,13 @@ def unreliable_server(ip, server_id, byzantine, connection):
                     doneServersLock.release()
                 time.sleep(0.1)
                 time_slept += 0.1
-            time_slept = 0
+
+            doneServersLock.acquire()
+            try:
+                if doneServers[server_id]:
+                    break
+            finally:
+                doneServersLock.release()
 
             isDown = not isDown
             logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
