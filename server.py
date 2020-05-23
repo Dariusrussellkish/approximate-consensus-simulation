@@ -138,9 +138,11 @@ def process_message():
         try:
             bcastListenSocket.settimeout(1)
             data, addr = bcastListenSocket.recvfrom(1024)
+            if not data:
+                continue
             message = json.loads(data.decode('utf-8'))
         except socket.timeout:
-            logging.warn(f"Server {serverID} timed out on BCAST read, isDone is {isDone}")
+            logging.info(f"Server {serverID} timed out on BCAST read, isDone is {isDone}")
             continue
         # if we pick up our own messages, don't listen
         if message["id"] == serverID:
@@ -218,17 +220,18 @@ def process_controller_messages():
 
     while True:
         try:
+            controllerListenSocket.settimeout(100)
             data, addr = controllerListenSocket.recvfrom(1024)
         except socket.timeout:
-            logging.warn(f"Server {serverID} timed out on controller read, isDone is {isDone}")
+            logging.info(f"Server {serverID} timed out on controller read, isDone is {isDone}")
             continue
         if not data:
             continue
         message = json.loads(data.decode('utf-8'))
-        logging.debug(f"Server {serverID} received state update from controller, now isDown is {message['isDown']}, "
-                     f"isByzantine is {message['isByzantine']}, isPermanent is {message['isPermanent']}")
 
         atomic_variable_lock.acquire()
+        logging.info(f"Server {serverID} received state update from controller, now isDown is {message['isDown']}, "
+                     f"isByzantine is {message['isByzantine']}, isPermanent is {message['isPermanent']}")
         try:
             # once we get the permanent down command, set isDone to true and end all threads
             if message["isPermanent"]:

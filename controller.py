@@ -157,7 +157,13 @@ def process_server_states():
     controllerListenSocket.bind(("", params["controller_port"]))
 
     while True:
-        data, ip = controllerListenSocket.recvfrom(1024)
+        try:
+            data, ip = controllerListenSocket.recvfrom(1024)
+            if not data:
+                continue
+        except socket.timeout:
+            logging.info("Controller timed out on state update read")
+            continue
         message = json.loads(data.decode('utf-8'))
 
         # in some testing the server also picks up the UP/DOWN messages
