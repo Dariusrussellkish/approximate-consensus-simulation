@@ -71,7 +71,10 @@ def get_wait_time(shape=3, scale=2):
     :param scale:
     :return:
     """
-    return random.gamma(shape, scale)
+    wait = random.gamma(shape, scale)
+    if wait > 10:
+        wait = 10
+    return wait
 
 
 def downed_server(ip, server_id, connection):
