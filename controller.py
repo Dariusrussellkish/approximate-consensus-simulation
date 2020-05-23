@@ -8,7 +8,7 @@ import time
 import os
 import uuid
 
-from numpy import random
+from numpy import random, interp
 
 doneServersLock = threading.Lock()
 
@@ -61,7 +61,7 @@ def format_message(isByzantine, isDown, isPermanent=False):
     ).rjust(1024).encode('utf-8')
 
 
-def get_wait_time(shape=3, scale=2):
+def get_wait_time(isDown, shape=3, scale=2):
     """
     Sample wait time from a Gamma distribution
 
@@ -74,6 +74,10 @@ def get_wait_time(shape=3, scale=2):
     wait = random.gamma(shape, scale)
     if wait > 10:
         wait = 10
+    if isDown:
+        wait = interp(wait, (0, 10), (0, 5))
+    else:
+        wait = interp(wait, (0, 10), (0, 200))
     return wait
 
 
@@ -123,7 +127,7 @@ def unreliable_server(ip, server_id, byzantine, connection):
         finally:
             doneServersLock.release()
 
-        wait_time = get_wait_time()
+        wait_time = get_wait_time(isDown)
         time.sleep(wait_time)
 
         isDown = not isDown
