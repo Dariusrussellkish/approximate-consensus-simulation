@@ -173,6 +173,8 @@ def process_message():
                 logging.info(f"Server {serverID} accepting consensus update")
                 v = float(v) / float(sum(R))
                 p += 1
+                R = list([0 for _ in range(nServers)])
+                R[serverID] = 1
                 updated = True
 
             # send update to controller if we changed state
