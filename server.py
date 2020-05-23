@@ -39,7 +39,7 @@ isDone = False
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.DEBUG, filemode='w')
+logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.INFO, filemode='w')
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # lock for atomic updates
@@ -139,14 +139,14 @@ def process_message():
             data, addr = bcastListenSocket.recvfrom(1024)
             message = json.loads(data.decode('utf-8'))
         except socket.timeout:
-            logging.info(f"Server {serverID} timed out on BCAST read, isDone is {isDone}")
+            logging.warn(f"Server {serverID} timed out on BCAST read, isDone is {isDone}")
             continue
         # if we pick up our own messages, don't listen
         if message["id"] == serverID:
             continue
 
         atomic_variable_lock.acquire()
-        logging.info(
+        logging.debug(
             f"Server {serverID} {(v, p)}, R: {R} received broadcast from {message['id']}: {(message['v'], message['p'])}")
         try:
             if isDone:
@@ -154,7 +154,7 @@ def process_message():
 
             # skip if we are down
             if isDown:
-                logging.info(f"Server {serverID} is down, skipping")
+                logging.debug(f"Server {serverID} is down, skipping")
                 continue
 
             updated = False
@@ -167,7 +167,7 @@ def process_message():
                 updated = True
             elif message["p"] == p and R[int(message["id"])] == 0:
                 R[int(message["id"])] = 1
-                logging.info(f"Server {serverID} updating R: {R}")
+                logging.debug(f"Server {serverID} updating R: {R}")
 
                 if sum(R) >= int(params["servers"]) - int(params["f"]):
                     logging.info(f"Server {serverID} accepting consensus update")
@@ -181,7 +181,7 @@ def process_message():
             if updated:
                 message = format_message()
                 assert len(message) <= 1024
-                logging.info(f"Server {serverID} is sending state update to controller")
+                logging.debug(f"Server {serverID} is sending state update to controller")
                 controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
 
             # let the controller know we are done
@@ -219,12 +219,12 @@ def process_controller_messages():
         try:
             data, addr = controllerListenSocket.recvfrom(1024)
         except socket.timeout:
-            logging.info(f"Server {serverID} timed out on controller read, isDone is {isDone}")
+            logging.warn(f"Server {serverID} timed out on controller read, isDone is {isDone}")
             continue
         if not data:
             continue
         message = json.loads(data.decode('utf-8'))
-        logging.info(f"Server {serverID} received state update from controller, now isDown is {message['isDown']}, "
+        logging.debug(f"Server {serverID} received state update from controller, now isDown is {message['isDown']}, "
                      f"isByzantine is {message['isByzantine']}, isPermanent is {message['isPermanent']}")
 
         atomic_variable_lock.acquire()
