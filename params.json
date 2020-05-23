@@ -1,5 +1,5 @@
 {
-  "servers": 500,
+  "servers": 5,
   "f": 2,
   "K": 25,
   "controller_ip": "10.0.0.6",
@@ -9,7 +9,7 @@
   "byzantine_p": 0.1,
   "eps": 0.1,
   "broadcast_period": 100,
-  "n_simulations" : 100,
+  "n_simulations" : 2,
   "algorithm": "algorithm_2",
   "server_ips": [
     "10.0.0.1",
