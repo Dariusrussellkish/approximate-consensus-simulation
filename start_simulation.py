@@ -58,7 +58,7 @@ def start_simulation():
         net, hs = start_mini()
 
         print(f"Starting simulation {k}")
-        print(f"Starting controller on ip: {hs[-1].IP}")
+        print(f"Starting controller on ip: {hs[0].IP}")
         hs[0].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
 
         for i in range(params["servers"]):
