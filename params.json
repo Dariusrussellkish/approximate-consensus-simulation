@@ -2,7 +2,7 @@
   "servers": 5,
   "f": 2,
   "K": 25,
-  "controller_ip": "10.0.0.6",
+  "controller_ip": "10.0.0.1",
   "server_port": 37020,
   "controller_port": 37021,
   "byzantine_send_p": 0.5,

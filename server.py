@@ -21,6 +21,7 @@ from numpy import random, log
 # load in parameters
 with open(sys.argv[1], 'r') as fh:
     params = json.load(fh)
+params["server_ips"] = ["10.0.0." + str(i+2) for i in range(params['servers'])]
 
 # global variables
 serverID = int(sys.argv[2])

@@ -59,14 +59,14 @@ def start_simulation():
 
         print(f"Starting simulation {k}")
         print(f"Starting controller on ip: {hs[-1].IP}")
-        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
+        hs[0].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
 
         for i in range(params["servers"]):
-            print(f"Starting server {i} on ip: {hs[i].IP}")
-            hs[i].cmd(f"python3 ~/approximate-consensus-simulation/server.py {sys.argv[1]} {i} &")
+            print(f"Starting server {i} on ip: {hs[i+1].IP}")
+            hs[i+1].cmd(f"python3 ~/approximate-consensus-simulation/server.py {sys.argv[1]} {i} &")
 
         while True:
-            result = hs[-1].cmd(f"ps -fe | grep controller")
+            result = hs[0].cmd(f"ps -fe | grep controller")
             if "python3 /root/approximate-consensus-simulation/controller.py" not in result:
                 print(f"Simulation {k} finished")
                 break
