@@ -39,7 +39,6 @@ logging.info(f"Downed servers are: {downedServers}")
 notDownedServers = list(set(servers) - set(downedServers))
 logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
 byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDownedServers) + 1), replace=False)
-# byzantineServers = []
 logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 sockets = {}
@@ -150,8 +149,6 @@ def process_server_states():
 
     while True:
         data, ip = controllerListenSocket.recvfrom(1024)
-
-
         message = json.loads(data.decode('utf-8'))
 
         # in some testing the server also picks up the UP/DOWN messages
@@ -240,7 +237,7 @@ if __name__ == "__main__":
             if t is not main_thread:
                 t.join()
 
-        basepath = f"nServers_{params['servers']}_f_{params['f']}_eps_{params['eps']}_byzantineP_{params['byzantine_p']}_bcastPeriod_{params['broadcast_period']}"
+        basepath = f"{params['algorithm']}_nServers_{params['servers']}_f_{params['f']}_eps_{params['eps']}_byzantineP_{params['byzantine_p']}_bcastPeriod_{params['broadcast_period']}"
         # ensure basepath directory exists
         if not os.path.exists(basepath):
             os.makedirs(basepath)

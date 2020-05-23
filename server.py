@@ -1,10 +1,10 @@
 import json
 import logging
+import os
 import socket
 import sys
 import threading
 import time
-import os
 
 from numpy import random, log
 
@@ -17,20 +17,6 @@ from numpy import random, log
 # - Process state commands from the controller, UP, DOWN, BYZANTINE, and CRASH
 #   - if we crash, we tell all threads we are done, they join, and we tell the controller
 #     we are exiting.The controller ends the simulation when all servers are done by crashing them.
-
-# set up sockets to use
-bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-controllerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-bcastListenSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-controllerListenSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-controllerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-
-bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 # load in parameters
 with open(sys.argv[1], 'r') as fh:
@@ -62,17 +48,13 @@ atomic_variable_lock = threading.Lock()
 r = (3 * params["servers"] - 2 * params["f"]) / (4 * (params["servers"] - params["f"]))
 p_end = log(params["eps"] / K) / log(r)
 
-# more socket operations
-bcastListenSocket.bind(("", params["server_port"]))
-# controllerListenSocket.bind((params["controller_ip"], params["controller_port"]))
-
 
 def format_message(finished=False):
     """
     Formats internal state into utf-8 encoded JSON for sending over network
 
     NOTE: This MUST be called from inside the acquired lock to be meaningful
-    :return: utf-8 encoded JSON
+    :return: utf-8 encoded JSON padded to 1024 bytes
     """
     global serverID, v, p, isDone, isDown, isByzantine
     return json.dumps(
@@ -92,7 +74,11 @@ def periodic_broadcast():
     """
     Periodically broadcasts internal state based on period in parameter file
     """
-    global serverID, v, p, atomic_variable_lock, params, isDone, isDown, isByzantine, bcastSocket
+    global serverID, v, p, atomic_variable_lock, params, isDone, isDown, isByzantine
+    bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
     while True:
         atomic_variable_lock.acquire()
         try:
@@ -122,6 +108,7 @@ def periodic_broadcast():
 
         time.sleep(params["broadcast_period"] / 1000)
 
+    bcastSocket.close()
     logging.info(f"Server {serverID} is exiting periodic_broadcast")
     return True
 
@@ -130,7 +117,14 @@ def process_message():
     """
     Process incoming messages from other servers
     """
-    global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, controllerSocket, serverID, bcastSocket
+    global v, p, R, atomic_variable_lock, params, p_end, isDown, isDone, serverID
+    controllerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    bcastListenSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    controllerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    bcastListenSocket.bind(("", params["server_port"]))
+
     while True:
         atomic_variable_lock.acquire()
         try:
@@ -150,7 +144,8 @@ def process_message():
             continue
 
         atomic_variable_lock.acquire()
-        logging.info(f"Server {serverID} {(v, p)}, R: {R} received broadcast from {message['id']}: {(message['v'], message['p'])}")
+        logging.info(
+            f"Server {serverID} {(v, p)}, R: {R} received broadcast from {message['id']}: {(message['v'], message['p'])}")
         try:
             if isDone:
                 break
@@ -173,10 +168,10 @@ def process_message():
                 logging.info(f"Server {serverID} updating R: {R}")
 
             if sum(R) >= int(params["servers"]) - int(params["f"]):
-                    logging.info(f"Server {serverID} accepting consensus update")
-                    v = float(v) / float(sum(R))
-                    p += 1
-                    updated = True
+                logging.info(f"Server {serverID} accepting consensus update")
+                v = float(v) / float(sum(R))
+                p += 1
+                updated = True
 
             # send update to controller if we changed state
             if updated:
@@ -195,6 +190,8 @@ def process_message():
         finally:
             atomic_variable_lock.release()
 
+    bcastListenSocket.close()
+    controllerSocket.close()
     logging.info(f"Server {serverID} is exiting process_message")
     return True
 
@@ -203,7 +200,10 @@ def process_controller_messages():
     """
     Process crash state changes from the controller
     """
-    global isDown, isByzantine, isDone, controllerListenSocket, serverID
+    global isDown, isByzantine, isDone, serverID
+
+    controllerListenSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     # use TCP to force controller to wait
     controllerListenSocket.connect((params["controller_ip"], params["controller_port"]))
 

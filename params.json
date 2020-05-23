@@ -1,12 +1,5 @@
 {
-  "servers": 5,
-  "server_ips": [
-    "10.0.0.1",
-    "10.0.0.2",
-    "10.0.0.3",
-    "10.0.0.4",
-    "10.0.0.5"
-  ],
+  "servers": 500,
   "f": 2,
   "K": 25,
   "controller_ip": "10.0.0.6",
@@ -16,5 +9,13 @@
   "byzantine_p": 0.1,
   "eps": 0.1,
   "broadcast_period": 100,
-  "n_simulations" : 100
+  "n_simulations" : 100,
+  "algorithm": "algorithm_2",
+  "server_ips": [
+    "10.0.0.1",
+    "10.0.0.2",
+    "10.0.0.3",
+    "10.0.0.4",
+    "10.0.0.5"
+  ]
 }

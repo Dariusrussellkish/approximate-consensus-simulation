@@ -53,11 +53,11 @@ def start_simulation():
     with open(sys.argv[1], 'r') as fh:
         params = json.load(fh)
 
-    for i in range(params["n_simulations"]):
+    for k in range(params["n_simulations"]):
         system("mn --clean")
         net, hs = start_mini()
 
-        print(f"Starting simulation {i}")
+        print(f"Starting simulation {k}")
         print(f"Starting controller on ip: {hs[-1].IP}")
         hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
 
@@ -68,7 +68,7 @@ def start_simulation():
         while True:
             result = hs[-1].cmd(f"ps -fe | grep controller")
             if "python3 /root/approximate-consensus-simulation/controller.py" not in result:
-                print(f"Simulation {i} finished")
+                print(f"Simulation {k} finished")
                 break
             time.sleep(0.5)
     print("Done, now cleaning system")
