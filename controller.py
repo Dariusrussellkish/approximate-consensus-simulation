@@ -99,8 +99,8 @@ def downed_server(ip, server_id, connection):
     """
     global params
     try:
-        wait_time = get_wait_time(False)
-        time.sleep(wait_time + 2)
+        # wait_time = get_wait_time(True)
+        # time.sleep(wait_time + 2)
         message = format_message(False, True, isPermanent=True)
         assert len(message) <= 1024
         connection.sendall(message)
