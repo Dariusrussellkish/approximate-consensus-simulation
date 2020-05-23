@@ -164,7 +164,7 @@ def process_server_states():
         if "id" not in message:
             continue
 
-        logging.info(f"Controller received state update from {message['id']}")
+        logging.info(f"Controller received state update from {message['id']}, it is now in phase {message['p']}")
 
         serverStates[message["id"]].append(message)
 
