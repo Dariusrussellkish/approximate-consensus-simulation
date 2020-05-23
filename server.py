@@ -220,7 +220,7 @@ def process_controller_messages():
 
     while True:
         try:
-            controllerListenSocket.settimeout(150)
+            controllerListenSocket.settimeout(10)
             data, addr = controllerListenSocket.recvfrom(1024)
         except socket.timeout:
             atomic_variable_lock.acquire()
