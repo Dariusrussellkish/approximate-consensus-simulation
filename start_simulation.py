@@ -20,7 +20,7 @@ class SimulationTopo(Topo):
         with open(sys.argv[1], 'r') as fh:
             params = json.load(fh)
         switch = self.addSwitch('s%s' % 1)
-        for i in range(params["servers"] + 1):
+        for i in range(params["servers"] + 2):
             host = self.addHost('h%s' % (i + 1))
             self.addLink(host, switch)
 
@@ -42,7 +42,6 @@ def start_mini():
     # net.pingAll()
 
     hs = [net.get('h{0}'.format(i + 1)) for i in range(params["servers"] + 1)]
-
     dumpNodeConnections(net.hosts)
 
     return net, hs
@@ -56,8 +55,11 @@ def start_simulation():
     for k in range(params["n_simulations"]):
         system("mn --clean")
         net, hs = start_mini()
-
+        hs[-1].setIP(f"{params['logging_server_ip']}/24")
         print(f"Starting simulation {k}")
+        print(f"Starting logging server on ip: {hs[-1].IP}")
+        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py")
+
         print(f"Starting controller on ip: {hs[0].IP}")
         hs[0].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
 

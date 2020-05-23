@@ -1,5 +1,5 @@
 import json
-import logging
+import logging, logging.handlers
 import os
 import socket
 import sys
@@ -41,6 +41,14 @@ if not os.path.exists('logs'):
 
 logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.INFO, filemode='w',
                     format='%(asctime)s %(levelname)-8s %(message)s')
+
+rootLogger = logging.getLogger('')
+rootLogger.setLevel(logging.DEBUG)
+socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
+                                               logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+
+rootLogger.addHandler(socketHandler)
+
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # lock for atomic updates
@@ -80,38 +88,40 @@ def periodic_broadcast():
     bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
-    while True:
-        atomic_variable_lock.acquire()
-        try:
-            # TODO: this might be refactorable to while not isDone
-
-            # break out of the infinite loop if the server is done
-            if isDone:
-                break
-            message = format_message()
-            assert len(message) <= 1024
-
-            if not isDown:
-                logging.debug(f"Server {serverID} is broadcasting and isByzantine is {isByzantine}")
-            # if we are not byzantine or down, broadcast to all
-            if not isDown and not isByzantine:
-                bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
-
-            # if we are byzantine and not down
-            elif not isDown and isByzantine:
-                for ip in params["server_ips"]:
-                    # flip (biased) coin if we will send to server
-                    if random.rand() > params["byzantine_send_p"]:
-                        logging.debug(f"Server {serverID} is broadcasting to {ip}")
-                        bcastSocket.sendto(message, (ip, params["server_port"]))
-        finally:
-            atomic_variable_lock.release()
-
-        time.sleep(params["broadcast_period"] / 1000)
-
-    bcastSocket.close()
-    logging.info(f"Server {serverID} is exiting periodic_broadcast")
+    try:
+        while True:
+            atomic_variable_lock.acquire()
+            try:
+                # TODO: this might be refactorable to while not isDone
+    
+                # break out of the infinite loop if the server is done
+                if isDone:
+                    break
+                message = format_message()
+                assert len(message) <= 1024
+    
+                if not isDown:
+                    logging.debug(f"Server {serverID} is broadcasting and isByzantine is {isByzantine}")
+                # if we are not byzantine or down, broadcast to all
+                if not isDown and not isByzantine:
+                    bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
+    
+                # if we are byzantine and not down
+                elif not isDown and isByzantine:
+                    for ip in params["server_ips"]:
+                        # flip (biased) coin if we will send to server
+                        if random.rand() > params["byzantine_send_p"]:
+                            logging.debug(f"Server {serverID} is broadcasting to {ip}")
+                            bcastSocket.sendto(message, (ip, params["server_port"]))
+            finally:
+                atomic_variable_lock.release()
+    
+            time.sleep(params["broadcast_period"] / 1000)
+    except:
+        logging.exception(f"Server {serverID} encountered exception in periodic_broadcast")
+    finally:
+        bcastSocket.close()
+        logging.info(f"Server {serverID} is exiting periodic_broadcast")
     return True
 
 
@@ -136,7 +146,7 @@ def process_message():
         finally:
             atomic_variable_lock.release()
         try:
-            bcastListenSocket.settimeout(1)
+            bcastListenSocket.settimeout(5)
             data, addr = bcastListenSocket.recvfrom(1024)
             if not data:
                 continue
@@ -162,25 +172,26 @@ def process_message():
 
             updated = False
             if int(message["p"]) > int(p):
-                logging.info(f"Server {serverID} accepting jump update from {message['id']}")
                 v = float(message["v"])
                 p = int(message["p"])
                 R = list([0 for _ in range(nServers)])
                 R[serverID] = 1
                 updated = True
+                logging.info(f"Server {serverID} accepting jump update from {message['id']}, now in phase {p}")
+
             elif message["p"] == p and R[int(message["id"])] == 0:
                 R[int(message["id"])] = 1
                 logging.debug(f"Server {serverID} updating R: {R}")
 
                 if sum(R) >= int(params["servers"]) - int(params["f"]):
-                    logging.info(f"Server {serverID} accepting consensus update")
                     v = float(v) / float(sum(R))
                     p += 1
                     R = list([0 for _ in range(nServers)])
                     R[serverID] = 1
                     updated = True
+                    logging.info(f"Server {serverID} accepting consensus update, now in phase {p}")
 
-            # send update to controller if we changed state
+        # send update to controller if we changed state
             if updated:
                 message = format_message()
                 assert len(message) <= 1024

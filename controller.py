@@ -1,5 +1,5 @@
 import json
-import logging
+import logging, logging.handlers
 import pickle
 import socket
 import sys
@@ -23,6 +23,13 @@ logging.basicConfig(filename=f"logs/controller.log", level=logging.DEBUG, filemo
 # load in parameters
 with open(sys.argv[1], 'r') as fh:
     params = json.load(fh)
+
+rootLogger = logging.getLogger('')
+rootLogger.setLevel(logging.DEBUG)
+socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
+                                               logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+
+rootLogger.addHandler(socketHandler)
 
 # list of server states for post hoc analysis
 serverStates = {}
