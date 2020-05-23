@@ -1,7 +1,7 @@
 import json
 import sys
 import time
-from os import system
+import os
 
 from mininet.cli import CLI
 from mininet.log import setLogLevel
@@ -53,19 +53,19 @@ def start_simulation():
         params = json.load(fh)
 
     for k in range(params["n_simulations"]):
-        system("mn --clean")
+        os.system("mn --clean")
         net, hs = start_mini()
         hs[-1].setIP(f"{params['logging_server_ip']}/24")
         print(f"Starting simulation {k}")
         print(f"Starting logging server on ip: {hs[-1].IP}")
-        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py &")
+        hs[-1].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py > logs/logging_server.out 2>&1 &")
 
         print(f"Starting controller on ip: {hs[0].IP}")
-        hs[0].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} &")
+        hs[0].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} > logs/controller.out 2>&1 &")
 
         for i in range(params["servers"]):
             print(f"Starting server {i} on ip: {hs[i+1].IP}")
-            hs[i+1].cmd(f"python3 ~/approximate-consensus-simulation/server.py {sys.argv[1]} {i} &")
+            hs[i+1].cmd(f"python3 ~/approximate-consensus-simulation/server.py {sys.argv[1]} {i} > logs/server_{i}.out 2>&1 &")
 
         while True:
             result = hs[0].cmd(f"ps -fe | grep controller")
@@ -74,9 +74,11 @@ def start_simulation():
                 break
             time.sleep(0.5)
     print("Done, now cleaning system")
-    system("mn --clean")
+    os.system("mn --clean")
 
 
 if __name__ == "__main__":
-    system("mn --clean")
+    os.system("mn --clean")
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
     start_simulation()
