@@ -224,7 +224,13 @@ def process_controller_messages():
     controllerListenSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     # use TCP to force controller to wait
-    controllerListenSocket.connect((params["controller_ip"], params["controller_port"]))
+    connected = False
+    while not connected:
+        try:
+            controllerListenSocket.connect((params["controller_ip"], params["controller_port"]))
+            connected = True
+        except ConnectionRefusedError:
+            logging.info(f"Server {serverID} connection refused, retrying")
 
     logging.info(f"Server {serverID} connected to controller")
 
