@@ -5,6 +5,7 @@ import socketserver
 import struct
 import os
 
+
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
 

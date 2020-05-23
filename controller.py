@@ -94,17 +94,18 @@ def downed_server(ip, server_id, connection):
     Permanently downs a server
     """
     global params
-
-    wait_time = get_wait_time(False)
-    time.sleep(wait_time + 2)
-    message = format_message(False, True, isPermanent=True)
-    assert len(message) <= 1024
-    connection.sendall(message)
-    connection.close()
-
-    doneServersLock.acquire()
     try:
+        wait_time = get_wait_time(False)
+        time.sleep(wait_time + 2)
+        message = format_message(False, True, isPermanent=True)
+        assert len(message) <= 1024
+        connection.sendall(message)
+        connection.close()
+    
+        doneServersLock.acquire()
         doneServers[server_id] = True
+    except:
+        logging.exception(f"Controller encountered exception downing server {server_id}")
     finally:
         doneServersLock.release()
     logging.info(f"Controller sent permanent downed command to {ip}")
@@ -117,40 +118,42 @@ def unreliable_server(ip, server_id, byzantine, connection):
     Periodically downs and ups a server
     """
     global params, doneServers
+    try:
+        isDown = False
+        isByzantine = False
 
-    isDown = False
-    isByzantine = False
-
-    while True:
-        doneServersLock.acquire()
-        try:
-            if doneServers[server_id]:
-                # ensure the server is up before ending UP/DOWN broadcasts
-                message = format_message(isByzantine, False)
-                assert len(message) <= 1024
-                connection.sendall(message)
+        while True:
+            doneServersLock.acquire()
+            try:
+                if doneServers[server_id]:
+                    # ensure the server is up before ending UP/DOWN broadcasts
+                    message = format_message(isByzantine, False)
+                    assert len(message) <= 1024
+                    connection.sendall(message)
+                    break
+            except socket.error as e:
                 break
-        except socket.error as e:
-            break
-        finally:
-            doneServersLock.release()
+            finally:
+                doneServersLock.release()
 
-        wait_time = get_wait_time(isDown)
-        time.sleep(wait_time)
+            wait_time = get_wait_time(isDown)
+            time.sleep(wait_time)
 
-        isDown = not isDown
-        logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
-        if byzantine and not isByzantine:
-            isByzantine = random.rand() < params["byzantine_p"]
-            message = format_message(True, isDown)
-        elif isByzantine:
-            message = format_message(True, isDown)
-        else:
-            message = format_message(False, isDown)
-        assert len(message) <= 1024
-        connection.sendall(message)
-
-    connection.close()
+            isDown = not isDown
+            logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
+            if byzantine and not isByzantine:
+                isByzantine = random.rand() < params["byzantine_p"]
+                message = format_message(True, isDown)
+            elif isByzantine:
+                message = format_message(True, isDown)
+            else:
+                message = format_message(False, isDown)
+            assert len(message) <= 1024
+            connection.sendall(message)
+    except:
+        logging.exception(f"Controller encountered exception in unreliable server {server_id}")
+    finally:
+        connection.close()
     return True
 
 
