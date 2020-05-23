@@ -7,6 +7,7 @@ import os
 import json
 import sys
 
+
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
 
@@ -57,7 +58,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
     allow_reuse_address = True
 
-    def __init__(self, host='localhost',
+    def __init__(self, host='0.0.0.0',
                  port=9999,
                  handler=LogRecordStreamHandler):
         socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
