@@ -216,7 +216,11 @@ def process_controller_messages():
     logging.info(f"Server {serverID} connected to controller")
 
     while True:
-        data, addr = controllerListenSocket.recvfrom(1024)
+        try:
+            data, addr = controllerListenSocket.recvfrom(1024)
+        except socket.timeout:
+            logging.info(f"Server {serverID} timed out on controller read, isDone is {isDone}")
+            continue
         if not data:
             continue
         message = json.loads(data.decode('utf-8'))
