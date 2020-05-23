@@ -44,7 +44,7 @@ logging.basicConfig(filename=f"logs/server_{serverID}.log", level=logging.INFO, 
 
 rootLogger = logging.getLogger('')
 socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
-                                               logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+                                               9999)
 
 rootLogger.addHandler(socketHandler)
 
