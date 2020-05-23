@@ -26,7 +26,7 @@ with open(sys.argv[1], 'r') as fh:
 
 rootLogger = logging.getLogger('')
 socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
-                                               logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+                                               9999)
 
 rootLogger.addHandler(socketHandler)
 
@@ -37,7 +37,7 @@ for i in range(params["servers"]):
 
 doneServers = [False for _ in range(params["servers"])]
 
-params["server_ips"] = ["10.0.0." + str(i+2) for i in range(params['servers'])]
+params["server_ips"] = ["10.0.0." + str(i+3) for i in range(params['servers'])]
 logging.info(f"Server IPs are {set(params['server_ips'])}")
 
 # pick which servers will be down
