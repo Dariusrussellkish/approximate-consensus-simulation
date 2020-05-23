@@ -233,11 +233,6 @@ def process_controller_messages():
             controllerListenSocket.settimeout(10)
             data, addr = controllerListenSocket.recvfrom(1024)
         except socket.timeout:
-            atomic_variable_lock.acquire()
-            try:
-                isDown = False
-            finally:
-                atomic_variable_lock.release()
             logging.info(f"Server {serverID} timed out on controller read, isDone is {isDone}")
             continue
         if not data:
