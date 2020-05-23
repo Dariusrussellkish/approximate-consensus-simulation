@@ -4,7 +4,8 @@ import pickle
 import socketserver
 import struct
 import os
-
+import json
+import sys
 
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
@@ -77,11 +78,13 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 
 def main():
+    with open(sys.argv[1], 'r') as fh:
+        params = json.load(fh)
     if not os.path.exists('logs'):
         os.makedirs('logs')
     logging.basicConfig(filename=f"logs/logging_server.log", filemode='w',
         format='%(relativeCreated)5d %(name)-15s %(levelname)-8s %(message)s')
-    tcpserver = LogRecordSocketReceiver()
+    tcpserver = LogRecordSocketReceiver(host=params["logging_server_ip"])
     print('About to start TCP server...')
     tcpserver.serve_until_stopped()
 
