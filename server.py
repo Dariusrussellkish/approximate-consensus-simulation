@@ -236,10 +236,10 @@ def process_controller_messages():
 
     while True:
         try:
-            controllerListenSocket.settimeout(10)
+            controllerListenSocket.settimeout(1)
             data, addr = controllerListenSocket.recvfrom(1024)
         except socket.timeout:
-            logging.info(f"Server {serverID} timed out on controller read, isDone is {isDone}")
+            logging.debug(f"Server {serverID} timed out on controller read, isDone is {isDone}")
             continue
         if not data:
             continue

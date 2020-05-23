@@ -84,7 +84,7 @@ def main():
     if not os.path.exists('logs'):
         os.makedirs('logs')
     logging.basicConfig(filename=f"logs/logging_server.log", filemode='w',
-        format='%(relativeCreated)12d %(name)-6s %(levelname)-6s %(message)s')
+        format='%(relativeCreated)-12d %(name)-6s %(levelname)-6s %(message)s')
     tcpserver = LogRecordSocketReceiver()
     print('About to start TCP server...')
     tcpserver.serve_until_stopped()
