@@ -243,8 +243,10 @@ def process_controller_messages():
             continue
         if not data:
             continue
-        message = json.loads(data.decode('utf-8'))
-
+        try:
+            message = json.loads(data.decode('utf-8'))
+        except json.decoder.JSONDecodeError:
+            logging.exception(f"Server {serverID} encountered exception trying to process JSON: {data.decode('utf-8').strip()}")
         atomic_variable_lock.acquire()
         logging.info(f"Server {serverID} received state update from controller, now isDown is {message['isDown']}, "
                      f"isByzantine is {message['isByzantine']}, isPermanent is {message['isPermanent']}")
