@@ -126,6 +126,7 @@ def process_message():
     bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     bcastListenSocket.bind(("", params["server_port"]))
 
+    signaled_controller = False
     while True:
         atomic_variable_lock.acquire()
         try:
@@ -183,10 +184,12 @@ def process_message():
 
             # let the controller know we are done
             if p > p_end:
-                logging.info(f"Server {serverID} letting controller know they are done")
-                message = format_message(finished=True)
-                assert len(message) <= 1024
-                controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+                if not signaled_controller:
+                    logging.info(f"Server {serverID} letting controller know they are done")
+                    message = format_message(finished=True)
+                    assert len(message) <= 1024
+                    controllerSocket.sendto(message, (params["controller_ip"], params["controller_port"]))
+                    signaled_controller = True
 
         finally:
             atomic_variable_lock.release()
