@@ -78,6 +78,7 @@ def start_simulation():
 
 if __name__ == "__main__":
     os.system("mn --clean")
+    os.system("rm /logs/logging_server.log")
     if not os.path.exists('logs'):
         os.makedirs('logs')
     start_simulation()
