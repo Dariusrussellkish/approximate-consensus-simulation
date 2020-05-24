@@ -18,5 +18,6 @@
     "10.0.0.4",
     "10.0.0.5"
   ],
-  "logging_server_ip": "10.0.0.1"
+  "logging_server_ip": "10.0.0.1",
+  "bucket": "gs://approximate-consistency-simulations"
 }

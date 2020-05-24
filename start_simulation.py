@@ -25,14 +25,11 @@ class SimulationTopo(Topo):
             self.addLink(host, switch)
 
 
-def start_mini():
+def start_mini(params):
     """
     Start Mininet with mounted directories
     :return:
     """
-
-    with open(sys.argv[1], 'r') as fh:
-        params = json.load(fh)
 
     setLogLevel('info')
     topo = SimulationTopo()
@@ -47,14 +44,11 @@ def start_mini():
     return net, hs
 
 
-def start_simulation():
-
-    with open(sys.argv[1], 'r') as fh:
-        params = json.load(fh)
+def start_simulation(params):
 
     for k in range(params["n_simulations"]):
         os.system("mn --clean")
-        net, hs = start_mini()
+        net, hs = start_mini(params)
         print(f"Starting simulation {k}")
         print(f"Starting logging server on ip: {hs[0].IP}")
         hs[0].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py {sys.argv[1]} > logs/logging_server.out 2>&1 &")
@@ -77,8 +71,11 @@ def start_simulation():
 
 
 if __name__ == "__main__":
+    with open(sys.argv[1], 'r') as fh:
+        params = json.load(fh)
     os.system("mn --clean")
     os.system("rm /logs/logging_server.log")
     if not os.path.exists('logs'):
         os.makedirs('logs')
-    start_simulation()
+    start_simulation(params)
+    os.system(f"gsutil -m cp -r algorithm_* {params['bucket']}")
