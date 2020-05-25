@@ -16,5 +16,6 @@
   "bucket": "gs://approximate-consistency-simulations",
   "server_ips": [
     "localhost"
-  ]
+  ],
+  "drop_rate": 0.1
 }
