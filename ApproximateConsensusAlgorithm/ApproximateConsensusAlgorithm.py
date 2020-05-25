@@ -28,7 +28,7 @@ def __get_algorithm__(algorithm: str, params):
 
 
 class ApproximateConsensusAlgorithm:
-    logging.getLogger('AC-Algo')
+    logger = logging.getLogger('AC-Algo')
 
     def __init__(self, params, server_id, algorithm_key="algorithm"):
         self.params = params
@@ -60,6 +60,8 @@ class ApproximateConsensusAlgorithm:
         self.stateLock.acquire()
         try:
             updated = self.algorithm.process_message(message)
+            ApproximateConsensusAlgorithm.logger.info(f"Server {self.params['server_id']} received "
+                                                      f"message from {message['id']}")
             return updated
         finally:
             self.stateLock.release()
