@@ -28,7 +28,7 @@ class PureNetworkImplementation:
                 connected = True
             except ConnectionRefusedError:
                 PureNetworkImplementation.logger.info(f"Server {self.server_id} connection refused, retrying")
-    
+
         PureNetworkImplementation.logger.info(f"Server {self.server_id} connected to controller")
 
     def cleanup(self):
