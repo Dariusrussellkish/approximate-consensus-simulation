@@ -15,9 +15,9 @@ def __mean_trim__(l1, f):
     sorted_l1 = deepcopy(l1)
     sorted_l1.sort()
     trimmed_list = np.array(sorted_l1)[f:-f]
-    print(l1)
-    print(sorted_l1)
-    print(trimmed_list)
+    logging.info(f"{l1}")
+    logging.info(f"{sorted_l1}")
+    logging.info(f"{trimmed_list}")
     return (max(trimmed_list) + min(trimmed_list)) / 2.0
 
 
