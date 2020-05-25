@@ -38,20 +38,6 @@ for i in range(params["servers"]):
 
 doneServers = [False for _ in range(params["servers"])]
 
-params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
-logging.info(f"Server IPs are {set(params['server_ips'])}")
-
-# pick which servers will be down
-servers = params["server_ips"]
-downedServers = random.choice(servers, params["f"], replace=False)
-logging.info(f"Downed servers are: {downedServers}")
-notDownedServers = list(set(servers) - set(downedServers))
-logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
-byzantineServers = random.choice(notDownedServers, random.randint(0, len(notDownedServers) + 1), replace=False)
-logging.info(f"Byzantine Servers are: {byzantineServers}")
-
-sockets = {}
-
 
 def format_message(isByzantine, isDown, isPermanent=False):
     """
@@ -219,8 +205,6 @@ def process_server_states():
 
 if __name__ == "__main__":
 
-    # TODO: refactor to make default state for servers DOWN, then wait for all connect TCP and send UP status and
-    #  byzantine
     try:
         logging.info(f"Controller is starting")
 
@@ -229,6 +213,24 @@ if __name__ == "__main__":
         except ValueError as e:
             logging.exception(e)
             sys.exit(22)
+
+        params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
+        logging.info(f"Server IPs are {set(params['server_ips'])}")
+
+        # pick which servers will be down
+        servers = params["server_ips"]
+        downedServers = random.choice(servers, params["f"], replace=False)
+        logging.info(f"Downed servers are: {downedServers}")
+        notDownedServers = list(set(servers) - set(downedServers))
+        logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
+        if algorithm.supports_byzantine():
+            byzantineServers = random.choice(notDownedServers,
+                                             random.randint(0, len(notDownedServers) + 1), replace=False)
+        else:
+            byzantineServers = []
+        logging.info(f"Byzantine Servers are: {byzantineServers}")
+
+        sockets = {}
 
         controllerListener = threading.Thread(target=process_server_states)
         controllerListener.start()
