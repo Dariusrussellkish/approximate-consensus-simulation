@@ -252,10 +252,12 @@ if __name__ == "__main__":
         logging.info(f"Controller has connected to all servers")
 
         # send command to all servers to go up
+        first_started_time = int(round(time.time() * 1000))
         for ip in params["server_ips"]:
             connection = sockets[ip]
             message = format_message(False, False)
             connection.sendall(message)
+        all_started_time = int(round(time.time() * 1000))
 
         logging.info(f"Controller has started all servers")
 
@@ -272,7 +274,6 @@ if __name__ == "__main__":
                 controller = threading.Thread(target=unreliable_server, args=(ip, i, False, sockets[ip]))
                 controller.start()
 
-        all_started_time = int(round(time.time() * 1000))
         main_thread = threading.currentThread()
         for t in threading.enumerate():
             if t is not main_thread:
@@ -288,7 +289,8 @@ if __name__ == "__main__":
                 {
                     "serverStates": serverStates,
                     "params": params,
-                    "start_time": all_started_time,
+                    "first_start_time": first_started_time,
+                    "all_start_time": all_started_time,
                 }, fh
             )
 

@@ -170,7 +170,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
         if message["id"] == server_id:
             continue
 
-        logger.debug(f"Server {server_id} received message from {message['id']}")
+        logger.info(f"Server {server_id} received message from {message['id']}")
 
         updated = algorithm.process_message(message)
 
