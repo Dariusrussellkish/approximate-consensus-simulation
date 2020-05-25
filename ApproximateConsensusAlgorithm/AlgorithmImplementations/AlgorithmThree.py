@@ -14,7 +14,10 @@ def __filter_list__(to_filter, remove=None):
 def __mean_trim__(l1, f):
     sorted_l1 = deepcopy(l1)
     sorted_l1.sort()
-    trimmed_list = np.array(sorted_l1)[f:-f]
+    if f != 0:
+        trimmed_list = np.array(sorted_l1)[f:-f]
+    else:
+        trimmed_list = np.array(sorted_l1)
     logging.info(f"{l1}")
     logging.info(f"{sorted_l1}")
     logging.info(f"{trimmed_list}")
