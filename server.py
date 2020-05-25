@@ -126,17 +126,16 @@ def periodic_broadcast(algorithm, server_state, server_id):
             if not state['is_down']:
                 logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
 
-            # if we are not byzantine or down, broadcast to all
-            if (not state['is_down'] and not state['is_byzantine']) or not algorithm.supports_byzantine():
-                bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
-
-            # if we are byzantine and not down
-            elif not state['is_down'] and state['is_byzantine']:
+            if (not state['is_down']) and state['is_byzantine'] and algorithm.supports_byzantine():
                 for ip in params["server_ips"]:
                     # flip (biased) coin if we will send to server
                     if random.rand() > params["byzantine_send_p"]:
                         logger.debug(f"Server {serverID} is broadcasting to {ip}")
                         bcastSocket.sendto(message, (ip, params["server_port"]))
+
+            # if we are not byzantine or down, broadcast to all
+            elif not state['is_down']:
+                bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
 
             time.sleep(params["broadcast_period"] / 1000)
     finally:
@@ -171,7 +170,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
             continue
 
         if random.rand() < params['drop_rate']:
-            logger.info(f"Server {server_id} is dropping packet from {message['id']}")
+            logger.debug(f"Server {server_id} is dropping packet from {message['id']}")
             continue
 
         logger.debug(f"Server {server_id} received message from {message['id']}")
