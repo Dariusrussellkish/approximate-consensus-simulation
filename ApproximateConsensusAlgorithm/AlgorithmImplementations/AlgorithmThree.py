@@ -18,9 +18,6 @@ def __mean_trim__(l1, f):
         trimmed_list = np.array(sorted_l1)[f:-f]
     else:
         trimmed_list = np.array(sorted_l1)
-    logging.info(f"{l1}")
-    logging.info(f"{sorted_l1}")
-    logging.info(f"{trimmed_list}")
     return (max(trimmed_list) + min(trimmed_list)) / 2.0
 
 
