@@ -52,9 +52,11 @@ class AlgorithmThree:
     def process_message(self, message):
         s_id = message['id']
         if message['p'] > self.p and self.S[s_id] is None:
+            AlgorithmThree.logger.info(f"Server {self.server_id} adding {s_id} to future list, S is {self.S}")
             self.S[s_id] = message['v']
         elif message['p'] == self.p and self.R[s_id] is None:
             self.R[s_id] = message['v']
+            AlgorithmThree.logger.info(f"Server {self.server_id} adding {s_id} to seen list, R is {self.R}")
 
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
