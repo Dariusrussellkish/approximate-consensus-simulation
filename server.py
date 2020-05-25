@@ -15,8 +15,10 @@ from numpy import random
 
 
 class ServerState:
-
+    logger = logging.getLogger('Server')
+    
     def __init__(self, server_id):
+        self.server_id = server_id
         self.is_down = True
         self.is_byzantine = False
         self.is_done = False
@@ -30,6 +32,8 @@ class ServerState:
             self.is_done = message['is_done']
         finally:
             self.lock.release()
+            ServerState.logger.info(f"Server {self.server_id} received {self.is_down} {self.is_byzantine} "
+                                    f"{self.is_done} from controller")
 
     def get_state(self):
         self.lock.acquire()
@@ -108,6 +112,9 @@ def periodic_broadcast(algorithm, server_state, server_id):
     bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+    logger.info(f"Server {server_id} starting to broadcast periodically")
+
     try:
         while not server_state.is_finished():
             state = server_state.get_state()
@@ -143,6 +150,8 @@ def process_message(algorithm, server_state, controller_connection, server_id):
     bcastListenSocket.bind(("", params["server_port"]))
     signaled_controller = False
 
+    logger.info(f"Server {server_id} starting to process byzantine messages")
+
     while not server_state.is_finished():
         if algorithm.is_done():
             break
@@ -165,7 +174,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
             algo_state = algorithm.get_internal_state()
             state = server_state.get_state()
             message = format_message({**algo_state, **state})
-            logging.debug(f"Server {serverID} is sending state update to controller")
+            logging.info(f"Server {serverID} is sending state update to controller")
             controller_connection.send_state(message)
 
         # let the controller know we are done
@@ -187,6 +196,7 @@ def process_controller_messages(server_state, controller_connection, server_id):
     """
     Process crash state changes from the controller
     """
+    logger.info(f"Server {server_id} starting to process controller messages")
     while not server_state.is_finished():
         try:
             message = controller_connection.get_data()
