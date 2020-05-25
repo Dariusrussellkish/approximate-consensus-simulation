@@ -18,7 +18,7 @@ class AlgorithmOne:
         self.eps = eps
         self.R = defaultdict(lambda: list([None for _ in range(self.nServers)]))
         self.R[self.p][self.server_id] = self.v
-        self.p_end = ((servers - f - 1) * log(eps / K)) / log(1 - (1 / ((2 * (servers - f)) ** (servers - f - 1))))
+        self.p_end = ((servers - f - 1.) * log(eps / K)) / log(1. - (1. / ((2. * (servers - f)) ** (servers - f - 1.))))
         AlgorithmOne.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
