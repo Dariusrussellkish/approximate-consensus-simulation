@@ -51,6 +51,8 @@ class AlgorithmFour:
 
     def process_message(self, message):
         s_id = message['id']
+        AlgorithmFour.logger.info(
+            f"Server {self.server_id} received message from {s_id}")
         if message['p'] > self.p:
             self.p = message['p']
             self.v = message['v']
