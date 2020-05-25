@@ -1,5 +1,7 @@
 import logging
-from numpy import random, log, mean
+from copy import deepcopy
+from collections import sort
+from numpy import random, log, maximum, minimum
 import numpy as np
 
 
@@ -10,7 +12,8 @@ def __filter_list__(to_filter, remove=None):
 
 
 def __mean_trim__(l1, f):
-    trimmed_list = np.array(l1)[f:-f]
+    sorted_l1 = sort(deepcopy(l1))
+    trimmed_list = np.array(sorted_l1)[f:-f]
     return (max(trimmed_list) + min(trimmed_list)) / 2.0
 
 

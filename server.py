@@ -203,7 +203,7 @@ def process_controller_messages(server_state, controller_connection, server_id):
 
 
 if __name__ == "__main__":
-    logging.info(f"Server {serverID} is beginning simulation")
+    logger.info(f"Server {serverID} is beginning simulation")
 
     server_state = ServerState(serverID)
     algorithm = ApproximateConsensusAlgorithm(params, serverID)
@@ -228,4 +228,4 @@ if __name__ == "__main__":
 
     controller_connection.cleanup()
 
-    logging.info(f"Server {serverID} finished")
+    logger.info(f"Server {serverID} finished")
