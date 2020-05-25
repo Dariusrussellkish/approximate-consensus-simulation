@@ -51,11 +51,6 @@ logging.info(f"Byzantine Servers are: {byzantineServers}")
 
 sockets = {}
 
-r = (3 * params["servers"] - 2 * params["f"]) / (4 * (params["servers"] - params["f"]))
-p_end = log(params["eps"] / params["K"]) / log(r)
-
-logging.info(f"Controller p_end is {p_end}")
-
 
 def format_message(isByzantine, isDown, isPermanent=False):
     """

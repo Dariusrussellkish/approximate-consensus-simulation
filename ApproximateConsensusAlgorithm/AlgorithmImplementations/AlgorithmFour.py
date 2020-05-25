@@ -38,7 +38,7 @@ class AlgorithmFour:
         self.supports_byzantine = False
         self.eps = eps
         self._reset()
-        self.isDone = False
+        self.is_done = False
 
     def _reset(self):
         self.w = None
@@ -47,7 +47,7 @@ class AlgorithmFour:
         self.S = list([None for _ in range(self.nServers)])
 
     def is_done(self):
-        return self.isDone
+        return self.is_done
 
     def process_message(self, message):
         s_id = message['id']
@@ -59,6 +59,8 @@ class AlgorithmFour:
                 f"Server {self.server_id} accepted jump update from {s_id}, phase is now {self.p}")
             return True
         elif message['p'] == self.p:
+            AlgorithmFour.logger.info(
+                f"Server {self.server_id} updating R and S vector from {s_id}")
             self.R[s_id] = message['v']
             self.S[s_id] = message['w']
 
@@ -70,6 +72,8 @@ class AlgorithmFour:
                 self.w = -1
             else:
                 self.w = majority_value
+            AlgorithmFour.logger.info(
+                f"Server {self.server_id} updating S vector with value {self.w}")
             self.S[s_id] = self.w
 
         if len(filtered_S) >= self.nServers - self.f:
@@ -77,7 +81,7 @@ class AlgorithmFour:
             if values:
                 self.v = values[0]
                 if len(list(x for x in self.S if x == self.v)) > self.f + 1:
-                    self.isDone = True
+                    self.is_done = True
             else:
                 self.v = __flip_coin__()
             self.p += 1
