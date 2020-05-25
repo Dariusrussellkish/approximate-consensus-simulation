@@ -126,7 +126,7 @@ def periodic_broadcast(algorithm, server_state, server_id):
             if not state['is_down']:
                 logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
 
-            if (not state['is_down']) and state['is_byzantine'] and algorithm.supports_byzantine():
+            if algorithm.supports_byzantine() and not state['is_down'] and state['is_byzantine']:
                 for ip in params["server_ips"]:
                     # flip (biased) coin if we will send to server
                     if random.rand() > params["byzantine_send_p"]:
