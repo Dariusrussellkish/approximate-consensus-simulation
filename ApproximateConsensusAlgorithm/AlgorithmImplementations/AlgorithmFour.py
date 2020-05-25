@@ -38,7 +38,7 @@ class AlgorithmFour:
         self.supports_byzantine = False
         self.eps = eps
         self._reset()
-        self.is_done = False
+        self.isDone = False
 
     def _reset(self):
         self.w = None
@@ -47,7 +47,7 @@ class AlgorithmFour:
         self.S = list([None for _ in range(self.nServers)])
 
     def is_done(self):
-        return self.is_done
+        return self.isDone
 
     def process_message(self, message):
         s_id = message['id']
@@ -81,7 +81,7 @@ class AlgorithmFour:
             if values:
                 self.v = values[0]
                 if len(list(x for x in self.S if x == self.v)) > self.f + 1:
-                    self.is_done = True
+                    self.isDone = True
             else:
                 self.v = __flip_coin__()
             self.p += 1
