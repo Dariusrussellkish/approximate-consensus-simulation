@@ -1,0 +1,21 @@
+{
+  "servers": 25,
+  "f": 4,
+  "K": 1,
+  "eps": 0.001,
+  "byzantine_send_p": 0.5,
+  "byzantine_p": 0.1,
+  "broadcast_period": 100,
+  "algorithm": "JACM86",
+  "controller_implementation": "PureNetworkImplementation",
+  "logging_server_ip": "10.0.0.1",
+  "n_simulations" : 200,
+  "controller_ip": "10.0.0.2",
+  "server_port": 37020,
+  "controller_port": 37021,
+  "bucket": "gs://approximate-consistency-simulations",
+  "server_ips": [
+    "localhost"
+  ],
+  "drop_rate": 0.1
+}

@@ -80,4 +80,4 @@ if __name__ == "__main__":
             os.makedirs('logs')
         start_simulation(params)
     finally:
-        os.system(f"gsutil -m cp -r algorithm_* {params['bucket']}")
+        os.system(f"gsutil -m cp -r data {params['bucket']}")

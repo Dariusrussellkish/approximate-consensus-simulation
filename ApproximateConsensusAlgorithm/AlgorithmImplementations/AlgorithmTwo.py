@@ -13,7 +13,7 @@ class AlgorithmTwo:
         self.p = 0
         self.f = f
         self.supports_byzantine = False
-        self.has_valid_n = True
+        self.has_valid_n = servers > 2 * f
         self.eps = eps
         self._reset()
         self.r = (3 * servers - 2 * f) / (4 * (servers - f))

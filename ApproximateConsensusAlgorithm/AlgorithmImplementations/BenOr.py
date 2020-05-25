@@ -37,7 +37,7 @@ class AlgorithmBenOr:
         self.phase = 1
         self.f = f
         self.supports_byzantine = False
-        self.has_valid_n = True
+        self.has_valid_n = servers > 2 * f
         self.eps = eps
         self._reset()
         self.isDone = False

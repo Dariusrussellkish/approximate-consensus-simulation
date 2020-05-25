@@ -15,7 +15,7 @@ class AlgorithmOne:
         self.p = 0
         self.f = f
         self.supports_byzantine = False
-        self.has_valid_n = True
+        self.has_valid_n = servers > 2 * f
         self.eps = eps
         self.R = defaultdict(lambda: [None for _ in range(self.nServers)])
         self.R[self.p][self.server_id] = self.v

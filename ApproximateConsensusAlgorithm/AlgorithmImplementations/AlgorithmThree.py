@@ -33,12 +33,12 @@ class AlgorithmThree:
         self.nServers = servers
         self.server_id = server_id
         self.v = random.uniform(0, K)
-        self.has_valid_n = servers >= 5 * f + 1
+        self.has_valid_n = servers > 5 * f
         self.p = 0
         self.f = f
         self.eps = eps
         self._reset()
-        self.supports_byzantine = servers >= 5 * f + 1
+        self.supports_byzantine = servers > 5 * f
         self.a = 0.5 * ((servers - 5 * f) / (2 * (servers - f)))
         self.p_end = log(eps / K) / log(self.a)
         AlgorithmThree.logger.info(
