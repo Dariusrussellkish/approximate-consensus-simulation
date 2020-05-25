@@ -37,7 +37,7 @@ for i in range(params["servers"]):
 
 doneServers = [False for _ in range(params["servers"])]
 
-# params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
+params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
 logging.info(f"Server IPs are {set(params['server_ips'])}")
 
 # pick which servers will be down
