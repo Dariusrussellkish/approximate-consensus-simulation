@@ -63,7 +63,6 @@ class AlgorithmThree:
         filtered_S = __filter_list__(self.S)
         if len(filtered_R) + len(filtered_S) >= self.nServers - self.f:
             union = __not_none_union__(filtered_R, filtered_S)
-            AlgorithmThree.logger.info(f"Server {self.server_id} union {union}")
             self.v = __mean_trim__(union, self.f)
             self.p += 1
             self._reset()
