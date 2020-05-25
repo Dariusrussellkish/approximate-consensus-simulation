@@ -60,8 +60,8 @@ class ApproximateConsensusAlgorithm:
         self.stateLock.acquire()
         try:
             updated = self.algorithm.process_message(message)
-            ApproximateConsensusAlgorithm.logger.info(f"Server {self.params['server_id']} received "
-                                                      f"message from {message['id']}, {message}")
+            ApproximateConsensusAlgorithm.logger.debug(f"Server {self.params['server_id']} received "
+                                                       f"message from {message['id']}, {message}")
             return updated
         finally:
             self.stateLock.release()
