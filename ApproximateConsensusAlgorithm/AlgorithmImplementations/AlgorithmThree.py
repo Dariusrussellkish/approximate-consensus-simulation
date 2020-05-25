@@ -8,7 +8,7 @@ import numpy as np
 def __filter_list__(to_filter, remove=None):
     if remove is None:
         remove = [None]
-    return list(x for x in to_filter if x in remove)
+    return list(x for x in to_filter if x not in remove)
 
 
 def __mean_trim__(l1, f):

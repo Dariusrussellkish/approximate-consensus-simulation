@@ -10,7 +10,7 @@ def __flip_coin__():
 def __filter_list__(to_filter, remove=None):
     if remove is None:
         remove = [None]
-    return list(x for x in to_filter if x in remove)
+    return list(x for x in to_filter if x not in remove)
 
 
 def __check_majority__(l1, ignore=None):
