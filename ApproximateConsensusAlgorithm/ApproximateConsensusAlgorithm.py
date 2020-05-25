@@ -63,7 +63,7 @@ class ApproximateConsensusAlgorithm:
         try:
             internal_state = {**self.algorithm.get_internal_state(),
                               'id': self.params['server_id'],
-                              'is_done': self.is_done()
+                              'is_done': self.algorithm.is_done()
                               }
             return internal_state
         finally:
