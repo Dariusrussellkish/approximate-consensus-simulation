@@ -9,7 +9,7 @@ import os
 import uuid
 
 from numpy import random, interp
-from .ApproximateConsensusAlgorithm.ApproximateConsensusAlgorithm import ApproximateConsensusAlgorithm
+from ApproximateConsensusAlgorithm.ApproximateConsensusAlgorithm import ApproximateConsensusAlgorithm
 
 doneServersLock = threading.Lock()
 
