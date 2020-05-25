@@ -25,15 +25,16 @@ def __check_majority__(l1, ignore=None):
     return None
 
 
-class AlgorithmFour:
-    logger = logging.getLogger('Algo-4')
+class AlgorithmBenOr:
+    logger = logging.getLogger('Algo-BenOr')
 
     def __init__(self, servers, server_id, f, eps, **kwargs):
         self.nServers = servers
         self.server_id = server_id
         self.v = __flip_coin__()
-        self.w = -1
+        self.w = None
         self.p = 0
+        self.phase = 1
         self.f = f
         self.supports_byzantine = False
         self.has_valid_n = True
@@ -42,58 +43,50 @@ class AlgorithmFour:
         self.isDone = False
 
     def _reset(self):
-        self.w = None
         self.R = list([None for _ in range(self.nServers)])
-        self.R[self.server_id] = 1
         self.S = list([None for _ in range(self.nServers)])
+        self.R[self.server_id] = self.v
+        self.S[self.server_id] = self.v
+        self.w = None
 
     def is_done(self):
         return self.isDone
 
     def process_message(self, message):
         s_id = message['id']
-        if message['p'] > self.p:
-            self.p = message['p']
-            self.v = message['v']
-            self._reset()
-            AlgorithmFour.logger.info(
-                f"Server {self.server_id} accepted jump update from {s_id}, phase is now {self.p}")
-            return True
-        elif message['p'] == self.p:
-            AlgorithmFour.logger.debug(
-                f"Server {self.server_id} updating R and S vector from {s_id}, R {self.R}, S {self.S}")
+        if message['p'] == self.p and message['phase'] == 1:
             self.R[s_id] = message['v']
+        elif message['p'] == self.p and message['phase'] == 2:
             self.S[s_id] = message['w']
 
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
-        if len(filtered_R) >= self.nServers - self.f and (self.w in [None, -1]):
+        if self.phase == 1 and len(filtered_R) >= self.nServers - self.f:
             majority_value = __check_majority__(self.R)
-            if majority_value is None:
-                self.w = -1
-            else:
+            if majority_value is not None:
                 self.w = majority_value
-            AlgorithmFour.logger.debug(
-                f"Server {self.server_id} updating S vector with value {self.w}, {self.S}")
-            self.S[self.server_id] = self.w
-
-        if len(filtered_S) >= self.nServers - self.f:
+            else:
+                self.w = -1
+            self.phase = 2
+        elif self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
             values = __filter_list__(self.S, remove=[None, -1])
             if values:
                 self.v = values[0]
-                if len(list(x for x in self.S if x == self.v)) >= self.f + 1:
+                if len(list(x for x in self.S if x == self.v)) > self.f:
                     self.isDone = True
             else:
                 self.v = __flip_coin__()
-            self.p += 1
+            self.phase = 1
             self._reset()
-            AlgorithmFour.logger.info(
+            AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} accepted update, phase is now {self.p}")
+            self.p += 1
             return True
         return False
 
     def get_internal_state(self):
         return {
+            'phase': self.phase,
             'v': self.v,
             'p': int(self.p),
             'w': self.w

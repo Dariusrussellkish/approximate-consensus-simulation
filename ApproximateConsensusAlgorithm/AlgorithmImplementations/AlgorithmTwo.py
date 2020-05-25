@@ -9,10 +9,11 @@ class AlgorithmTwo:
         self.K = K
         self.nServers = servers
         self.server_id = server_id
-        self.v = float(random.randint(0, K + 1))
+        self.v = random.uniform(0, K)
         self.p = 0
         self.f = f
         self.supports_byzantine = False
+        self.has_valid_n = True
         self.eps = eps
         self._reset()
         self.r = (3 * servers - 2 * f) / (4 * (servers - f))

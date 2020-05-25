@@ -41,7 +41,8 @@ class ServerState:
             ret = {
                 'is_down': self.is_down,
                 'is_byzantine': self.is_byzantine,
-                'is_done': self.is_done
+                'is_done': self.is_done,
+                'time_generated': int(round(time.time() * 1000)),
             }
             return ret
         finally:
@@ -184,9 +185,9 @@ def process_message(algorithm, server_state, controller_connection, server_id):
         if algorithm.is_done():
             if not signaled_controller:
                 logging.info(f"Server {serverID} letting controller know they are done")
-                algo_state = algorithm.get_internal_state()
                 state = server_state.get_state()
-                message = format_message({**state, **algo_state, 'is_done': True})
+                algo_state = algorithm.get_internal_state()
+                message = format_message({**state, **algo_state})
                 controller_connection.send_state(message)
                 signaled_controller = True
 

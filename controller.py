@@ -8,7 +8,8 @@ import time
 import os
 import uuid
 
-from numpy import random, interp, log
+from numpy import random, interp
+from .ApproximateConsensusAlgorithm.ApproximateConsensusAlgorithm import ApproximateConsensusAlgorithm
 
 doneServersLock = threading.Lock()
 
@@ -190,7 +191,8 @@ def process_server_states():
 
         logging.info(f"Controller received state update from {message['id']}, it is now in phase {message['p']}")
 
-        serverStates[message["id"]].append(message)
+        received_time = int(round(time.time() * 1000))
+        serverStates[message["id"]].append({**message, 'received_time': received_time})
 
         doneServersLock.acquire()
         try:
@@ -221,6 +223,12 @@ if __name__ == "__main__":
     #  byzantine
     try:
         logging.info(f"Controller is starting")
+
+        try:
+            algorithm = ApproximateConsensusAlgorithm(params, -1)
+        except ValueError as e:
+            logging.exception(e)
+            sys.exit(22)
 
         controllerListener = threading.Thread(target=process_server_states)
         controllerListener.start()
@@ -264,6 +272,7 @@ if __name__ == "__main__":
                 controller = threading.Thread(target=unreliable_server, args=(ip, i, False, sockets[ip]))
                 controller.start()
 
+        all_started_time = int(round(time.time() * 1000))
         main_thread = threading.currentThread()
         for t in threading.enumerate():
             if t is not main_thread:
@@ -279,6 +288,7 @@ if __name__ == "__main__":
                 {
                     "serverStates": serverStates,
                     "params": params,
+                    "start_time": all_started_time,
                 }, fh
             )
 

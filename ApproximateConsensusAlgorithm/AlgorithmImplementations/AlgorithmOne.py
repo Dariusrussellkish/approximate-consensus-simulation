@@ -11,10 +11,11 @@ class AlgorithmOne:
         self.K = K
         self.nServers = servers
         self.server_id = server_id
-        self.v = float(random.randint(0, K + 1))
+        self.v = random.uniform(0, K)
         self.p = 0
         self.f = f
         self.supports_byzantine = False
+        self.has_valid_n = True
         self.eps = eps
         self.R = defaultdict(lambda: list([None for _ in range(self.nServers)]))
         self.R[self.p][self.server_id] = self.v
@@ -32,7 +33,7 @@ class AlgorithmOne:
             self.R[p][s_id] = message['v']
             filtered_list = list(x for x in self.R[self.p] if x is not None)
             if len(filtered_list) >= self.nServers - self.f:
-                self.v = float(mean(filtered_list))
+                self.v = (max(filtered_list) + min(filtered_list)) / 2.
                 self.p += 1
                 self.R[self.p][self.server_id] = self.v
                 AlgorithmOne.logger.info(

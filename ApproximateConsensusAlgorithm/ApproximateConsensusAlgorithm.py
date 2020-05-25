@@ -23,6 +23,10 @@ def __get_algorithm__(algorithm: str, params):
         return AlgorithmThree(**params)
     elif algorithm == "algorithm_4":
         return AlgorithmFour(**params)
+    elif algorithm == "BenOr":
+        return AlgorithmBenOr(**params)
+    elif algorithm == "JACM86":
+        return AlgorithmJACM86(**params)
     else:
         raise InvalidAlgorithmError
 
@@ -43,6 +47,12 @@ class ApproximateConsensusAlgorithm:
             logging.exception(f"Algorithm key {algorithm_key} not found in params dict")
             raise KeyError(f"Algorithm key {algorithm_key} not found in params dict")
 
+        if not self.algorithm.has_valid_n:
+            logging.fatal(f"Algorithm {params[algorithm_key]} does not have sufficient "
+                          f"n={params['servers']} for f={params['f']}")
+            raise ValueError(f"Algorithm {params[algorithm_key]} does not have sufficient "
+                             f"n={params['servers']} for f={params['f']}")
+
     def get_internal_state(self):
         """
         Return algorithm internal state as Dict
@@ -51,7 +61,10 @@ class ApproximateConsensusAlgorithm:
         """
         self.stateLock.acquire()
         try:
-            internal_state = {**self.algorithm.get_internal_state(), 'id': self.params['server_id']}
+            internal_state = {**self.algorithm.get_internal_state(),
+                              'id': self.params['server_id'],
+                              'is_done': self.is_done()
+                              }
             return internal_state
         finally:
             self.stateLock.release()
