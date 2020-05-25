@@ -51,7 +51,7 @@ class AlgorithmJACM86:
         self._reset()
         self.supports_byzantine = servers >= 5 * f + 1
         self.a = 0.5 * ((servers - 5 * f) / (2 * (servers - f)))
-        self.p_end = None
+        self.p_end = log(eps / K) / log(0.5)
         self.done_servers = [False for _ in range(servers)]
         self.done_values = [None for _ in range(servers)]
         AlgorithmJACM86.logger.info(
@@ -62,8 +62,6 @@ class AlgorithmJACM86:
         self.R[self.server_id] = self.v
 
     def is_done(self):
-        if self.p_end is None:
-            return False
         return self.p > self.p_end
 
     def process_message(self, message):
@@ -81,21 +79,13 @@ class AlgorithmJACM86:
                 if v:
                     self.R[i] = self.done_values[i]
             filtered_R = __filter_list__(self.R)
-            if self.p == 0:
-                self.v = __mean_trim__(filtered_R, 2 * self.f)
-                dV = max(filtered_R) - min(filtered_R)
-                self.p_end = ceil(log(dV/self.eps)/log(__c__(self.nServers - 3 * self.f, 2 * self.f)))
+            values = __trim__(filtered_R, self.f)
+            if self.p <= self.p_end:
+                self.v = (max(values) + min(values)) / 2
                 self.p += 1
                 self._reset()
                 AlgorithmJACM86.logger.info(
                     f"Server {self.server_id} accepting update via mean trim, phase is now {self.p}")
-                return True
-            elif self.p <= self.p_end:
-                self.v = mean(__select__(__trim__(filtered_R, self.f), 2 * self.f))
-                self.p += 1
-                self._reset()
-                AlgorithmJACM86.logger.info(
-                    f"Server {self.server_id} accepting update via mean select trim, phase is now {self.p}")
                 return True
         return False
 
