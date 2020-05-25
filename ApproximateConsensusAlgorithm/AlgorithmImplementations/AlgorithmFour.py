@@ -59,7 +59,7 @@ class AlgorithmFour:
                 f"Server {self.server_id} accepted jump update from {s_id}, phase is now {self.p}")
             return True
         elif message['p'] == self.p:
-            AlgorithmFour.logger.debug(
+            AlgorithmFour.logger.info(
                 f"Server {self.server_id} updating R and S vector from {s_id}")
             self.R[s_id] = message['v']
             self.S[s_id] = message['w']
@@ -72,7 +72,7 @@ class AlgorithmFour:
                 self.w = -1
             else:
                 self.w = majority_value
-            AlgorithmFour.logger.debug(
+            AlgorithmFour.logger.info(
                 f"Server {self.server_id} updating S vector with value {self.w}")
             self.S[s_id] = self.w
 
