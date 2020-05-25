@@ -52,14 +52,13 @@ class AlgorithmThree:
     def process_message(self, message):
         s_id = message['id']
         if message['p'] > self.p and self.S[s_id] is None:
-            AlgorithmThree.logger.info(f"Server {self.server_id} adding {s_id} to future list, S is {self.S}")
             self.S[s_id] = message['v']
         elif message['p'] == self.p and self.R[s_id] is None:
             self.R[s_id] = message['v']
-            AlgorithmThree.logger.info(f"Server {self.server_id} adding {s_id} to seen list, R is {self.R}")
 
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
+        AlgorithmThree.logger.info(f"Server {self.server_id} filtered_S {filtered_S}, filtered_R {filtered_R}")
         if len(filtered_R) + len(filtered_S) > self.nServers - self.f:
             self.v = __mean_trim__(__not_none_union__(filtered_R, filtered_S), self.f)
             self.p += 1
