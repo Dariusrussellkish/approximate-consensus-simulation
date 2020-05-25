@@ -73,9 +73,11 @@ def start_simulation(params):
 if __name__ == "__main__":
     with open(sys.argv[1], 'r') as fh:
         params = json.load(fh)
-    os.system("mn --clean")
-    os.system("rm /logs/logging_server.log")
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    start_simulation(params)
-    os.system(f"gsutil -m cp -r algorithm_* {params['bucket']}")
+    try:
+        os.system("mn --clean")
+        os.system("rm /logs/logging_server.log")
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        start_simulation(params)
+    finally:
+        os.system(f"gsutil -m cp -r algorithm_* {params['bucket']}")

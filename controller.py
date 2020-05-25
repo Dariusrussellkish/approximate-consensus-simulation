@@ -37,7 +37,7 @@ for i in range(params["servers"]):
 
 doneServers = [False for _ in range(params["servers"])]
 
-params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
+# params["server_ips"] = ["10.0.0." + str(i + 3) for i in range(params['servers'])]
 logging.info(f"Server IPs are {set(params['server_ips'])}")
 
 # pick which servers will be down
@@ -66,9 +66,9 @@ def format_message(isByzantine, isDown, isPermanent=False):
     """
     return json.dumps(
         {
-            "isDown": isDown,
-            "isByzantine": isByzantine,
-            "isPermanent": isPermanent,
+            "is_down": isDown,
+            "is_byzantine": isByzantine,
+            "is_done": isPermanent,
         }
     ).rjust(1024).encode('utf-8')
 
@@ -199,9 +199,9 @@ def process_server_states():
 
         doneServersLock.acquire()
         try:
-            if message["done"]:
+            if message["is_done"]:
                 logging.info(f"Controller received DONE from {message['id']}, done servers are {doneServers}")
-                doneServers[message["id"]] = True
+                doneServers[message['id']] = True
 
             # check if all the servers are done (or permanently down)
             if all(doneServers):

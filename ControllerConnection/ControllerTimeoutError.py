@@ -1,0 +1,2 @@
+class ControllerTimeoutError(BaseException):
+    pass

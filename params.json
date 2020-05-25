@@ -1,23 +1,20 @@
 {
   "servers": 25,
-  "f": 3,
+  "f": 0,
   "K": 100,
+  "eps": 0.001,
+  "byzantine_send_p": 0.5,
+  "byzantine_p": 0.1,
+  "broadcast_period": 100,
+  "algorithm": "algorithm_3",
+  "controller_implementation": "PureNetworkImplementation",
+  "logging_server_ip": "10.0.0.1",
+  "n_simulations" : 1,
   "controller_ip": "10.0.0.2",
   "server_port": 37020,
   "controller_port": 37021,
-  "byzantine_send_p": 0.5,
-  "byzantine_p": -0.1,
-  "eps": 0.001,
-  "broadcast_period": 100,
-  "n_simulations" : 1,
-  "algorithm": "algorithm_2",
+  "bucket": "gs://approximate-consistency-simulations",
   "server_ips": [
-    "10.0.0.1",
-    "10.0.0.2",
-    "10.0.0.3",
-    "10.0.0.4",
-    "10.0.0.5"
-  ],
-  "logging_server_ip": "10.0.0.1",
-  "bucket": "gs://approximate-consistency-simulations"
+    "localhost"
+  ]
 }
