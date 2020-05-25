@@ -192,7 +192,7 @@ def process_server_states():
         logging.info(f"Controller received state update from {message['id']}, it is now in phase {message['p']}")
 
         received_time = int(round(time.time() * 1000))
-        serverStates[message["id"]].append({**message, 'received_time': received_time})
+        serverStates[message["id"]].append({**message, 'time_received': received_time})
 
         doneServersLock.acquire()
         try:
