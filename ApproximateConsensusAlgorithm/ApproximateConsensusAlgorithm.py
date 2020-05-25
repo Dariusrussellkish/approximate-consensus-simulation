@@ -74,7 +74,11 @@ class ApproximateConsensusAlgorithm:
         try:
             updated = self.algorithm.process_message(message)
             ApproximateConsensusAlgorithm.logger.info(f"Server {self.params['server_id']} received "
-                                                      f"message from {message['id']}, {message}")
+                                                      f"message from {message['id']}, "
+                                                      f"v {message['v']} "
+                                                      f"p {message['p']} "
+                                                      f"id {message['id']} "
+                                                      f"is_done {message['is_done']}")
             return updated
         finally:
             self.stateLock.release()
