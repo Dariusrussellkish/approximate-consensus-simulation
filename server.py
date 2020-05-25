@@ -122,7 +122,7 @@ def periodic_broadcast(algorithm, server_state, server_id):
             message = format_message({**state, **algo_state})
 
             if not state['is_down']:
-                logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
+                logger.info(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
 
             # if we are not byzantine or down, broadcast to all
             if (not state['is_down'] and not state['is_byzantine']) or not algorithm.supports_byzantine():
@@ -167,6 +167,8 @@ def process_message(algorithm, server_state, controller_connection, server_id):
         # if we pick up our own messages, don't listen
         if message["id"] == server_id:
             continue
+
+        logger.info(f"Server {server_id} received message from {message['id']}")
 
         updated = algorithm.process_message(message)
 
