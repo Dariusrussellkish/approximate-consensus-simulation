@@ -53,6 +53,7 @@ class AlgorithmJACM86:
         self.a = 0.5 * ((servers - 5 * f) / (2 * (servers - f)))
         self.p_end = None
         self.done_servers = [False for _ in range(servers)]
+        self.done_values = [None for _ in range(servers)]
         AlgorithmJACM86.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
@@ -69,6 +70,7 @@ class AlgorithmJACM86:
         s_id = message['id']
         if message['is_done']:
             self.done_servers[s_id] = True
+            self.done_values[s_id] = message['v']
 
         if message['p'] == self.p and self.R[s_id] is None:
             self.R[s_id] = message['v']
@@ -77,7 +79,7 @@ class AlgorithmJACM86:
         if len(filtered_R) + sum(self.done_servers) >= self.nServers - self.f:
             for i, v in enumerate(self.done_servers):
                 if v:
-                    self.R[i] = 0
+                    self.R[i] = self.done_values[i]
             filtered_R = __filter_list__(self.R)
             if self.p == 0:
                 self.v = __mean_trim__(filtered_R, 2 * self.f)
