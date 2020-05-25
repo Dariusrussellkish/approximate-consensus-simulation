@@ -60,7 +60,7 @@ class AlgorithmFour:
             return True
         elif message['p'] == self.p:
             AlgorithmFour.logger.info(
-                f"Server {self.server_id} updating R and S vector from {s_id}")
+                f"Server {self.server_id} updating R and S vector from {s_id}, R {self.R}, S {self.S}")
             self.R[s_id] = message['v']
             self.S[s_id] = message['w']
 
@@ -73,7 +73,7 @@ class AlgorithmFour:
             else:
                 self.w = majority_value
             AlgorithmFour.logger.info(
-                f"Server {self.server_id} updating S vector with value {self.w}")
+                f"Server {self.server_id} updating S vector with value {self.w}, {self.S}")
             self.S[s_id] = self.w
 
         if len(filtered_S) >= self.nServers - self.f:
