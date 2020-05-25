@@ -21,7 +21,7 @@ def __check_majority__(l1, ignore=None):
 
     for val, count in unique(filtered_list, return_counts=True):
         if count > len(l1)/2.0:
-            return val
+            return int(val)
     return None
 
 
@@ -90,6 +90,6 @@ class AlgorithmFour:
     def get_internal_state(self):
         return {
             'v': self.v,
-            'p': self.p,
+            'p': int(self.p),
             'w': self.w
         }
