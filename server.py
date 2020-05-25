@@ -102,6 +102,7 @@ def format_message(state):
         assert len(ret) <= 1024
     except AssertionError:
         logger.exception(ret.decode('utf-8'))
+        raise AssertionError
     return ret
 
 
@@ -150,7 +151,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
     bcastListenSocket.bind(("", params["server_port"]))
     signaled_controller = False
 
-    logger.info(f"Server {server_id} starting to process byzantine messages")
+    logger.info(f"Server {server_id} starting to process broadcast messages")
 
     while not server_state.is_finished():
         if algorithm.is_done():
