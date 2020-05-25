@@ -74,7 +74,7 @@ class AlgorithmFour:
                 self.w = majority_value
             AlgorithmFour.logger.info(
                 f"Server {self.server_id} updating S vector with value {self.w}, {self.S}")
-            self.S[s_id] = self.w
+            self.S[self.server_id] = self.w
 
         if len(filtered_S) >= self.nServers - self.f:
             values = __filter_list__(self.S, remove=[None, -1])
