@@ -59,6 +59,8 @@ class AlgorithmBenOr:
         elif message['p'] == self.p and message['phase'] == 2:
             self.S[s_id] = message['w']
 
+        AlgorithmBenOr.logger.info(
+            f"Server {self.server_id} received message from {s_id}, R={self.R}, S={self.S}")
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
         if self.phase == 1 and len(filtered_R) >= self.nServers - self.f:
