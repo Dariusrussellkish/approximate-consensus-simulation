@@ -357,6 +357,7 @@ if __name__ == "__main__":
             t.join()
 
         logger.info(f"Server {serverID} has connected to all other servers")
+        logger.info(f"{sockets.items}")
 
         serverBCast = threading.Thread(target=periodic_broadcast_tcp,
                                        args=(algorithm, server_state, serverID, sockets), name="serverBCast")
