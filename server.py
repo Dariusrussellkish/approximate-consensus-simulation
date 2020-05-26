@@ -192,7 +192,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
     while not server_state.is_finished():
         try:
-            rtr, _, _ = select.select(sockets.items(), [], [], 1)
+            rtr, _, _ = select.select(list(sockets.items()), [], [], 1)
         except socket.timeout:
             continue
         for r_socket in rtr:
@@ -357,7 +357,7 @@ if __name__ == "__main__":
             t.join()
 
         logger.info(f"Server {serverID} has connected to all other servers")
-        logger.info(f"{sockets.items}")
+        logger.info(f"{list(sockets.items())}")
 
         serverBCast = threading.Thread(target=periodic_broadcast_tcp,
                                        args=(algorithm, server_state, serverID, sockets), name="serverBCast")
