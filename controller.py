@@ -7,6 +7,7 @@ import threading
 import time
 import os
 import uuid
+import shutil
 
 from numpy import random, interp
 from ApproximateConsensusAlgorithm.ApproximateConsensusAlgorithm import ApproximateConsensusAlgorithm
@@ -296,7 +297,7 @@ if __name__ == "__main__":
                     "all_start_time": all_started_time,
                 }, fh
             )
-
+        shutil.copytree("logs", f"data/logs_{unique}")
         logging.info("Controller is finished")
 
     except:
