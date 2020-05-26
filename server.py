@@ -400,10 +400,7 @@ if __name__ == "__main__":
         if t is not main_thread:
             t.join()
 
-    for socket in receive_sockets.items():
-        socket.close()
-
-    for socket in send_sockets.items():
+    for socket in sockets.items():
         socket.close()
 
     controller_connection.cleanup()
