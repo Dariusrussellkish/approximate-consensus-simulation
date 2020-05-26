@@ -172,6 +172,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
+    broadcast_tcp(algorithm, server_state, server_id, sockets)
     while not server_state.is_finished():
         try:
             rtr, _, _ = select.select(list(sockets.values()), [], [], 1)
@@ -190,7 +191,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             updated = algorithm.process_message(message)
 
             if updated:
-                broadcast_tcp(algorithm, server_state, server_id, sockets)
                 algo_state = algorithm.get_internal_state()
                 state = server_state.get_state()
                 message = format_message({**state, **algo_state})
