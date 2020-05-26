@@ -18,8 +18,8 @@ def __check_majority__(l1, ignore=None):
         ignore = [None]
 
     filtered_list = __filter_list__(l1, remove=ignore)
-
-    for val, count in unique(filtered_list, return_counts=True):
+    vals, counts = unique(filtered_list, return_counts=True)
+    for val, count in zip(vals, counts):
         if count > len(l1)/2.0:
             return int(val)
     return None
