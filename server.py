@@ -278,11 +278,10 @@ def process_controller_messages(server_state, controller_connection, server_id):
     return True
 
 
-def connect_to_tcp_servers(sockets):
-    logger.info(f"{sockets.keys()}")
-    for ip in params['server_ips']:
-        if ip == params['server_ips'][serverID] or ip in sockets:
-            continue
+def connect_to_tcp_servers(sockets, server_id):
+    for i in range(params['servers']-server_id, params['servers']):
+        ip = params['servers'][i]
+
         logging.info(f"Server {serverID} trying to connect with {ip}")
         broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         broadcast_tcp_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
@@ -293,8 +292,7 @@ def connect_to_tcp_servers(sockets):
                 logger.info(f"Server {serverID} connected with {ip}")
                 connected = True
             except ConnectionRefusedError:
-                logger.info(f"Server {serverID} connection refused to {ip}")
-                break
+                logger.info(f"Server {serverID} connection refused to {ip}, retrying")
             except OSError as e:
                 logger.exception("Server received error")
                 logger.info(f"Server {serverID} already connected with {ip}")
