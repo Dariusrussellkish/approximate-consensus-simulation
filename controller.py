@@ -297,7 +297,7 @@ if __name__ == "__main__":
                     "all_start_time": all_started_time,
                 }, fh
             )
-        shutil.copytree("logs", f"data/logs_{unique}_{sys.argv[3]}")
+        shutil.copytree("logs", f"data/{basepath}/logs_{unique}_{sys.argv[3]}")
         logging.info("Controller is finished")
 
     except:
