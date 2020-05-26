@@ -341,10 +341,6 @@ if __name__ == "__main__":
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
 
-        serverBCast = threading.Thread(target=periodic_broadcast_tcp,
-                                       args=(algorithm, server_state, serverID, sockets), name="serverBCast")
-        serverBCast.start()
-
         messageProcessor = threading.Thread(target=process_messages_tcp,
                                             args=(algorithm, server_state, controller_connection,
                                                   serverID, sockets),
