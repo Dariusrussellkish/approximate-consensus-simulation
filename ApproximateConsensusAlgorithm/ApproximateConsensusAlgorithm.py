@@ -54,8 +54,10 @@ class ApproximateConsensusAlgorithm:
                              f"n={params['servers']} for f={params['f']}")
 
         if hasattr(self.algorithm, "requires_synchronous_update_broadcast"):
+            logging.info(f"Algorithm {params[algorithm_key]} requires synchronous update broadcast")
             self.requires_synchronous_update_broadcast = self.algorithm.requires_synchronous_update_broadcast
         else:
+            logging.info(f"Algorithm {params[algorithm_key]} does not require synchronous update broadcast")
             self.requires_synchronous_update_broadcast = False
 
     def get_internal_state(self):
