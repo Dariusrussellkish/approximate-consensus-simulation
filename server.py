@@ -328,6 +328,7 @@ if __name__ == "__main__":
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
     sockets = {}
+    watch_threads = []
 
     if algorithm.requires_synchronous_update_broadcast:
         broadcast_tcp_r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -346,6 +347,7 @@ if __name__ == "__main__":
                                                   serverID, sockets),
                                             name="messageProcessor")
         messageProcessor.start()
+        watch_threads.append(messageProcessor)
 
     else:
         serverBCast = threading.Thread(target=periodic_broadcast,
@@ -356,14 +358,17 @@ if __name__ == "__main__":
                                             args=(algorithm, server_state, controller_connection, serverID, bcastSocket),
                                             name="messageProcessor")
         messageProcessor.start()
+        watch_threads.append(serverBCast)
+        watch_threads.append(messageProcessor)
 
     controllerListener = threading.Thread(target=process_controller_messages,
                                           args=(server_state, controller_connection, serverID),
                                           name="controllerListener")
     controllerListener.start()
+    watch_threads.append(controllerListener)
 
     while not server_state.is_finished():
-        for t in [serverBCast, messageProcessor, controllerListener]:
+        for t in watch_threads:
             if not t.is_alive() and not server_state.is_finished():
                 logging.fatal(f"Server {serverID} crashed in thread {t.name}")
                 server_state.lock.acquire()
