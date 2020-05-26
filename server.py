@@ -341,11 +341,13 @@ if __name__ == "__main__":
     receive_sockets = {}
 
     if algorithm.requires_synchronous_update_broadcast:
-        broadcast_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        broadcast_tcp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        broadcast_tcp_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        broadcast_tcp_r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        broadcast_tcp_r.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
-        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp, send_sockets,))
-        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp,
+        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp_s, send_sockets,))
+        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp_r,
                                                                                            receive_sockets,))
         connectToServers.start()
         receiveConnections.start()
