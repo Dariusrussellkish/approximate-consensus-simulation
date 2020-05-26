@@ -123,8 +123,8 @@ def unreliable_server(ip, server_id, byzantine, connection):
                     break
                 finally:
                     doneServersLock.release()
-                time.sleep(0.1)
-                time_slept += 0.1
+                time.sleep(0.5)
+                time_slept += 0.5
 
             doneServersLock.acquire()
             try:
