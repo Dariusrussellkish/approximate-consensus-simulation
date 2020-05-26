@@ -17,9 +17,9 @@ class AlgorithmOne:
         self.supports_byzantine = False
         self.has_valid_n = servers > 2 * f
         self.eps = eps
-        self.R = defaultdict(lambda: [None for _ in range(self.nServers)])
-        self.R[self.p][self.server_id] = self.v
         self.p_end = log(eps / K) / log(0.5)
+        self.R = [[None for i in range(servers)] for j in range(int(self.p_end) + 1)]
+        self.R[self.p][self.server_id] = self.v
         AlgorithmOne.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
