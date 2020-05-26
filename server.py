@@ -182,7 +182,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             data = r_socket.recv(1024)
             if not data or not data.decode('utf-8').strip():
                 continue
-            message = json.loads(data.decode('utf-8'))
+            try:
+                message = json.loads(data.decode('utf-8'))
+            except json.decoder.JSONDecodeError:
+                logging.error(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8')}")
+                continue
 
             if message["id"] == server_id:
                 continue
@@ -224,7 +228,11 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
             data, addr = bcastListenSocket.recvfrom(1024)
             if not data or not data.decode('utf-8').strip():
                 continue
-            message = json.loads(data.decode('utf-8'))
+            try:
+                message = json.loads(data.decode('utf-8'))
+            except json.decoder.JSONDecodeError:
+                logging.error(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8')}")
+                continue
         except socket.timeout:
             logger.debug(f"Server {server_id} timed out on BCAST read")
             continue
