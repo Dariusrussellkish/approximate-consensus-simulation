@@ -154,10 +154,8 @@ def process_message(algorithm, server_state, controller_connection, server_id):
     logger.info(f"Server {server_id} starting to process broadcast messages")
 
     while not server_state.is_finished():
-        if algorithm.is_done():
-            break
         try:
-            bcastListenSocket.settimeout(1)
+            bcastListenSocket.settimeout(5)
             data, addr = bcastListenSocket.recvfrom(1024)
             if not data or not data.decode('utf-8').strip():
                 continue
