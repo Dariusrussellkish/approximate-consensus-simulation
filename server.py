@@ -279,6 +279,7 @@ def process_controller_messages(server_state, controller_connection, server_id):
 
 
 def connect_to_tcp_servers(broadcast_tcp, sockets):
+    logger.info(f"{sockets.keys()}")
     for ip in params['server_ips']:
         if ip == params['server_ips'][serverID]:
             continue
@@ -295,6 +296,7 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
                 logger.info(f"Server {serverID} already connected with {ip}")
                 break
     return sockets
+
 
 def receive_connection_tcp_servers(broadcast_tcp, sockets):
     global params
