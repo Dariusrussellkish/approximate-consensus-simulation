@@ -34,7 +34,7 @@ def __get_algorithm__(algorithm: str, params):
 class ApproximateConsensusAlgorithm:
     logger = logging.getLogger('AC-Algo')
 
-    def __init__(self, params, server_id, algorithm_key="algorithm"):
+    def __init__(self, params, server_id: int, algorithm_key="algorithm"):
         self.params = params
         self.params["server_id"] = server_id
         self.stateLock = Lock()

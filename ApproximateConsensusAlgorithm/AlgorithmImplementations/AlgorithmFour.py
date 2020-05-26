@@ -1,5 +1,6 @@
 import logging
 import random
+from typing import List, Union
 from numpy import unique
 
 
@@ -45,7 +46,7 @@ class AlgorithmFour:
         self.w = None
         self.R = list([None for _ in range(self.nServers)])
         self.R[self.server_id] = 1
-        self.S = list([None for _ in range(self.nServers)])
+        self.S: List[Union[None, float]] = list([None for _ in range(self.nServers)])
 
     def is_done(self):
         return self.isDone
