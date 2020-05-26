@@ -281,7 +281,7 @@ def process_controller_messages(server_state, controller_connection, server_id):
 def connect_to_tcp_servers(sockets):
     logger.info(f"{sockets.keys()}")
     for ip in params['server_ips']:
-        if ip == params['server_ips'][serverID]:
+        if ip == params['server_ips'][serverID] or ip in sockets:
             continue
         logging.info(f"Server {serverID} trying to connect with {ip}")
         broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
