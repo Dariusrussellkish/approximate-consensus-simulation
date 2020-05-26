@@ -322,7 +322,7 @@ def receive_connection_tcp_servers(broadcast_tcp, sockets):
         connection, client_address = broadcast_tcp.accept()
 
         logging.info(f"Server established connection with {client_address}")
-        sockets[client_address[0]] = connection
+        sockets[client_address[0]] = connection[1]
     return sockets
 
 
