@@ -293,7 +293,7 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
             except OSError:
                 logger.info(f"Server {serverID} already connected with {ip}")
                 break
-
+    return sockets
 
 def receive_connection_tcp_servers(broadcast_tcp, sockets):
     global params
@@ -307,7 +307,7 @@ def receive_connection_tcp_servers(broadcast_tcp, sockets):
             sockets[client_address[0]] = connection
         except socket.timeout:
             pass
-
+    return sockets
 
 if __name__ == "__main__":
     logger.info(f"Server {serverID} is beginning simulation")
@@ -329,8 +329,8 @@ if __name__ == "__main__":
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
         broadcast_tcp_r.listen(1)
 
-        connect_to_tcp_servers(broadcast_tcp_r, sockets)
-        receive_connection_tcp_servers(broadcast_tcp_r, sockets)
+        sockets = connect_to_tcp_servers(broadcast_tcp_r, sockets)
+        sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets)
 
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
