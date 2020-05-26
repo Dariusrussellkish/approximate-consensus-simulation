@@ -180,7 +180,6 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         updated = algorithm.process_message(message)
 
         if algorithm.requires_synchronous_update_broadcast and updated:
-            logging.info(f"Server {serverID} is sending guaranteed broadcast from update")
             bcast = select.select([], [bcastSocket], [])[1][0]
             broadcast(algorithm, server_state, server_id, bcast)
 
