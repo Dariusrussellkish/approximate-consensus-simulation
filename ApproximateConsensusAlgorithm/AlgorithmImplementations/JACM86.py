@@ -76,6 +76,8 @@ class AlgorithmJACM86:
                 vector[s_id] = message['v']
 
         if self.R[message['p']][s_id] is None:
+            AlgorithmJACM86.logger.info(f"Server {self.server_id} "
+                                        f"received from {s_id} in phase {message['p']}")
             self.R[message['p']][s_id] = message['v']
 
         AlgorithmJACM86.logger.info(f"Server {self.server_id} "
