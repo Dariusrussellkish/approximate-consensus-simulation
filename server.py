@@ -91,8 +91,6 @@ socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
 rootLogger.addHandler(socketHandler)
 logger = logging.getLogger('Server')
 
-has_broadcasted_phase = False
-
 
 def format_message(state):
     """
@@ -133,7 +131,7 @@ def broadcast(algorithm, server_state, server_id, bcastSocket):
 
 
 def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
-    global params, has_broadcasted_phase
+    global params
     state = server_state.get_state()
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
@@ -148,21 +146,6 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
                     s.sendall(message)
             except IOError:
                 pass
-        has_broadcasted_phase = True
-
-
-def periodic_broadcast_tcp(algorithm, server_state, server_id, s_sockets):
-    global params
-    logger.info(f"Server {server_id} starting to broadcast periodically")
-    try:
-        while not server_state.is_finished():
-            broadcast_tcp(algorithm, server_state, server_id, s_sockets)
-            time.sleep(params["broadcast_period"] / 1000)
-        if algorithm.is_done():
-            broadcast_tcp(algorithm, server_state, server_id, s_sockets)
-    finally:
-        logger.info(f"Server {serverID} is exiting periodic_broadcast")
-    return True
 
 
 def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
@@ -186,7 +169,6 @@ def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
 
 
 def process_messages_tcp(algorithm, server_state, controller_connection, server_id, sockets):
-    global has_broadcasted_phase
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
@@ -208,14 +190,12 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             updated = algorithm.process_message(message)
 
             if updated:
+                broadcast_tcp(algorithm, server_state, server_id, sockets)
                 algo_state = algorithm.get_internal_state()
                 state = server_state.get_state()
                 message = format_message({**state, **algo_state})
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controller_connection.send_state(message)
-
-            if algorithm.requires_synchronous_update_broadcast and updated:
-                has_broadcasted_phase = False
 
             # let the controller know we are done
             if algorithm.is_done():
@@ -317,7 +297,7 @@ def connect_to_tcp_servers(broadcast_tcp):
     return sockets
 
 
-def receive_connection_tcp_servers(broadcast_tcp, sockets):
+def receive_connection_tcp_servers(broadcast_tcp):
     global params, sockets
     while len(sockets.keys()) < params['servers'] - 1:
         logging.info(f"Server is waiting for connection")
