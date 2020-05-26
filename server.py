@@ -288,7 +288,8 @@ def connect_to_tcp_servers(sockets, server_id):
         connected = False
         while not connected:
             try:
-                sockets[ip] = broadcast_tcp_s.connect((ip, params['server_port']))
+                broadcast_tcp_s.connect((ip, params['server_port']))
+                sockets[ip] = broadcast_tcp_s
                 logger.info(f"Server {serverID} connected with {ip}")
                 connected = True
             except ConnectionRefusedError:
