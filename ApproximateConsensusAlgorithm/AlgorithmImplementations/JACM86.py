@@ -50,19 +50,16 @@ class AlgorithmJACM86:
         self.eps = eps
         self.done_servers = [False for _ in range(servers)]
         self.done_values = [None for _ in range(servers)]
-        self._reset()
         self.supports_byzantine = servers > 5 * f
         self.p_end = log(eps / K) / log(0.5)
+        self._set()
         self.requires_synchronous_update_broadcast = True
         AlgorithmJACM86.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
-    def _reset(self):
-        self.R = [None for _ in range(self.nServers)]
-        self.R[self.server_id] = self.v
-        for i, v in enumerate(self.done_servers):
-            if v:
-                self.R[i] = self.done_values[i]
+    def _set(self):
+        self.R = [[None for _ in range(self.nServers)] for _ in range(self.p_end + 1)]
+        self.R[self.p][self.server_id] = self.v
 
     def is_done(self):
         return bool(self.p > self.p_end)
@@ -74,9 +71,12 @@ class AlgorithmJACM86:
                                         f"receiving done message from {s_id}")
             self.done_servers[s_id] = True
             self.done_values[s_id] = message['v']
+            # add done servers value to all vectors in R
+            for vector in self.R:
+                vector[s_id] = message['v']
 
-        if message['p'] == self.p and self.R[s_id] is None:
-            self.R[s_id] = message['v']
+        if self.R[message['p']][s_id] is None:
+            self.R[message['p']][s_id] = message['v']
 
         filtered_R = __filter_list__(self.R)
         if len(filtered_R) >= self.nServers - self.f:
@@ -84,7 +84,7 @@ class AlgorithmJACM86:
                 values = __trim__(filtered_R, self.f)
                 self.v = (max(values) + min(values)) / 2
                 self.p += 1
-                self._reset()
+                self.R[self.p][self.server_id] = self.v
                 AlgorithmJACM86.logger.info(
                     f"Server {self.server_id} accepting update via mean trim, phase is now {self.p}")
                 return True
