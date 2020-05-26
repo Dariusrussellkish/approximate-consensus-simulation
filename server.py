@@ -130,7 +130,7 @@ def periodic_broadcast(algorithm, server_state, server_id):
                 for ip in params["server_ips"]:
                     # flip (biased) coin if we will send to server
                     if random.rand() > params["byzantine_send_p"]:
-                        logger.debug(f"Server {serverID} is broadcasting to {ip}")
+                        logger.info(f"Server {serverID} is broadcasting to {ip}")
                         bcastSocket.sendto(message, (ip, params["server_port"]))
 
             # if we are not byzantine or down, broadcast to all
