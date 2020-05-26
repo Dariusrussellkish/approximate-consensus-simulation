@@ -65,7 +65,7 @@ class AlgorithmJACM86:
                 self.R[i] = self.done_values[i]
 
     def is_done(self):
-        return self.p > self.p_end
+        return bool(self.p > self.p_end)
 
     def process_message(self, message):
         s_id = message['id']
