@@ -130,7 +130,7 @@ def periodic_broadcast(algorithm, server_state, server_id):
                 for ip in params["server_ips"]:
                     # flip (biased) coin if we will send to server
                     if random.rand() > params["byzantine_send_p"]:
-                        logger.info(f"Server {serverID} is broadcasting to {ip}")
+                        logger.debug(f"Server {serverID} is broadcasting to {ip}")
                         bcastSocket.sendto(message, (ip, params["server_port"]))
 
             # if we are not byzantine or down, broadcast to all
@@ -155,7 +155,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
 
     while not server_state.is_finished():
         try:
-            bcastListenSocket.settimeout(5)
+            bcastListenSocket.settimeout(0.5)
             data, addr = bcastListenSocket.recvfrom(1024)
             if not data or not data.decode('utf-8').strip():
                 continue
@@ -178,7 +178,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
         if updated:
             algo_state = algorithm.get_internal_state()
             state = server_state.get_state()
-            message = format_message({**algo_state, **state})
+            message = format_message({**state, **algo_state})
             logging.info(f"Server {serverID} is sending state update to controller")
             controller_connection.send_state(message)
 
@@ -205,14 +205,11 @@ def process_controller_messages(server_state, controller_connection, server_id):
     while not server_state.is_finished():
         try:
             message = controller_connection.get_data()
+            server_state.process_message(message)
         except ControllerTimeoutError:
             logger.debug(f"Server {server_id} timed out on controller read")
-            continue
         except DataNotPresentError:
-            continue
-
-        server_state.process_message(message)
-
+            pass
     logger.info(f"Server {server_id} is exiting process_controller_messages")
     return True
 
@@ -224,17 +221,32 @@ if __name__ == "__main__":
     algorithm = ApproximateConsensusAlgorithm(params, serverID)
     controller_connection = ControllerConnection(params, serverID)
 
+    logger.info(f"Server {serverID} connected with controller")
+
     serverBCast = threading.Thread(target=periodic_broadcast,
-                                   args=(algorithm, server_state, serverID))
+                                   args=(algorithm, server_state, serverID), name="serverBCast")
     serverBCast.start()
 
     messageProcessor = threading.Thread(target=process_message,
-                                        args=(algorithm, server_state, controller_connection, serverID))
+                                        args=(algorithm, server_state, controller_connection, serverID),
+                                        name="messageProcessor")
     messageProcessor.start()
 
     controllerListener = threading.Thread(target=process_controller_messages,
-                                          args=(server_state, controller_connection, serverID))
+                                          args=(server_state, controller_connection, serverID),
+                                          name="controllerListener")
     controllerListener.start()
+
+    while not server_state.is_finished():
+        for t in [serverBCast, messageProcessor, controllerListener]:
+            if not t.is_alive() and not server_state.is_finished():
+                logging.fatal(f"Server {serverID} crashed in thread {t.name}")
+                server_state.lock.acquire()
+                try:
+                    server_state.is_done = True
+                finally:
+                    server_state.lock.release()
+        time.sleep(1)
 
     main_thread = threading.currentThread()
     for t in threading.enumerate():

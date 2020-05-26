@@ -107,31 +107,31 @@ def unreliable_server(ip, server_id, byzantine, connection):
     try:
         isDown = False
         isByzantine = False
+        done = False
         while True:
             time_slept = 0
             wait_time = get_wait_time(isDown)
             while time_slept < wait_time:
                 doneServersLock.acquire()
                 try:
-                    if doneServers[server_id]:
-                        # ensure the server is up before ending UP/DOWN broadcasts
-                        message = format_message(isByzantine, False)
-                        assert len(message) <= 1024
-                        connection.sendall(message)
-                        break
-                except socket.error as e:
+                    done = doneServers[server_id]
+                except socket.error:
                     break
                 finally:
                     doneServersLock.release()
+
+                if done:
+                    # ensure the server is up before ending UP/DOWN broadcasts
+                    message = format_message(isByzantine, False)
+                    assert len(message) <= 1024
+                    connection.sendall(message)
+                    break
+
                 time.sleep(0.5)
                 time_slept += 0.5
 
-            doneServersLock.acquire()
-            try:
-                if doneServers[server_id]:
-                    break
-            finally:
-                doneServersLock.release()
+            if done:
+                break
 
             isDown = not isDown
             logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
@@ -162,11 +162,12 @@ def process_server_states():
 
     while True:
         try:
+            controllerListenSocket.settimeout(5)
             data, ip = controllerListenSocket.recvfrom(1024)
             if not data:
                 continue
         except socket.timeout:
-            logging.info("Controller timed out on state update read")
+            logging.debug("Controller timed out on state update read")
             continue
         message = json.loads(data.decode('utf-8'))
 

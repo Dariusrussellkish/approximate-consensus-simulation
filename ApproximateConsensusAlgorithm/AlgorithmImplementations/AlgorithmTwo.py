@@ -16,8 +16,7 @@ class AlgorithmTwo:
         self.has_valid_n = servers > 2 * f
         self.eps = eps
         self._reset()
-        self.r = (3 * servers - 2 * f) / (4 * (servers - f))
-        self.p_end = log(eps / K) / log(self.r)
+        self.p_end = log(eps / K) / log(float(f) / (servers - f))
         AlgorithmTwo.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
@@ -29,27 +28,24 @@ class AlgorithmTwo:
         return self.p > self.p_end
 
     def process_message(self, message):
-        if message['p'] > self.p:
-            self.v = message['v']
-            self.p = message['p']
-            self._reset()
-            AlgorithmTwo.logger.info(
-                f"Server {self.server_id} accepting jump update from {message['id']}, now in phase {self.p}")
+        s_id = message['id']
+        p = message['p']
+        v = message['v']
+        if p > self.p:
+            self.v = v
+            self.p = p
             return True
-
-        elif message['p'] == self.p and self.R[message['id']] == 0:
-            self.R[message['id']] = 1
+        elif p == self.p and self.R[s_id] == 0:
+            self.R[s_id] = 1
+            self.v += v
             if sum(self.R) >= self.nServers - self.f:
-                self.v = float(self.v) / float(sum(self.R))
+                self.v = self.v / sum(self.R)
                 self.p += 1
                 self._reset()
                 AlgorithmTwo.logger.info(
                     f"Server {self.server_id} accepting consensus update, now in phase {self.p}")
                 return True
-            else:
-                return False
-        else:
-            return False
+        return False
 
     def get_internal_state(self):
         return {

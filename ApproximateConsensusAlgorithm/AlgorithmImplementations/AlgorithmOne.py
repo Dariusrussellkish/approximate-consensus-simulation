@@ -16,31 +16,20 @@ class AlgorithmOne:
         self.supports_byzantine = False
         self.has_valid_n = servers > 2 * f
         self.eps = eps
-        self.p_end = log(eps / K) / log(0.5)
-        self.R: List[List[Union[None, float]]] = [[None for i in range(servers)] for j in range(int(self.p_end) + 1)]
-        self.R[self.p][self.server_id] = self.v
+        self.p_end = log(eps / K) / log(float(f) / (servers - f))
+        self._reset()
         AlgorithmOne.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
     def is_done(self):
         return self.p > self.p_end
 
-    def process_message(self, message):
-        p = message['p']
-        s_id = message['id']
-        if self.R[p][s_id] is None:
-            self.R[p][s_id] = message['v']
-            AlgorithmOne.logger.info(f"Accepting new value from {s_id} in phase {p} R[p] is {self.R[p]}")
-            filtered_list: List[float] = list(float(x) for x in self.R[self.p] if x is not None)
-            if len(filtered_list) >= self.nServers - self.f:
-                self.v = (max(filtered_list) + min(filtered_list)) / 2.
-                self.p += 1
-                self.R[self.p][self.server_id] = self.v
-                AlgorithmOne.logger.info(
-                    f"Server {self.server_id} accepting consensus update, now in phase {self.p}")
-                return True
+    def _reset(self):
+        self.R = [0 for _ in range(self.nServers)]
+        self.R[self.server_id] = self.v
 
-        return False
+    def process_message(self, message):
+        pass
 
     def get_internal_state(self):
         return {

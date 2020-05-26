@@ -40,7 +40,7 @@ class PureNetworkImplementation:
 
     def get_data(self):
         try:
-            self.controller_listen_socket.settimeout(5)
+            self.controller_listen_socket.settimeout(0.5)
             data = self.controller_listen_socket.recv(1024)
         except socket.timeout:
             raise ControllerTimeoutError

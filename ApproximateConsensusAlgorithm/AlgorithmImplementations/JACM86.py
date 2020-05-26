@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from numpy import random, mean, floor, ceil, log
+from numpy import random, mean, floor, log
 import numpy as np
 
 

@@ -82,7 +82,7 @@ class AlgorithmFour:
             values = __filter_list__(self.S, remove=[None, -1])
             if values:
                 self.v = values[0]
-                if len(list(x for x in self.S if x == self.v)) >= self.f + 1:
+                if len(list(x for x in values if x == self.v)) >= self.f + 1:
                     self.isDone = True
             else:
                 self.v = __flip_coin__()
