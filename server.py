@@ -137,7 +137,7 @@ def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
 
     try:
         while not server_state.is_finished():
-            bcast = select.select([], [bcastSocket], [])[0]
+            bcast = select.select([], [bcastSocket], [])[1][0]
             broadcast(algorithm, server_state, server_id, bcast)
             time.sleep(params["broadcast_period"] / 1000)
     finally:
@@ -177,7 +177,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         updated = algorithm.process_message(message)
 
         if algorithm.requires_synchronous_update_broadcast and updated:
-            bcast = select.select([], [bcastSocket], [])[0]
+            bcast = select.select([], [bcastSocket], [])[1][0]
             broadcast(algorithm, server_state, server_id, bcast)
 
         if updated:
