@@ -279,7 +279,7 @@ def process_controller_messages(server_state, controller_connection, server_id):
 
 
 def connect_to_tcp_servers(sockets, server_id):
-    for i in range(params['servers']-server_id, params['servers']):
+    for i in range(0, server_id):
         ip = params['server_ips'][i]
 
         logging.info(f"Server {serverID} trying to connect with {ip}")
