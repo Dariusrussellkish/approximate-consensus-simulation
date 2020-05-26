@@ -315,12 +315,13 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
 
 
 def receive_connection_tcp_servers(broadcast_tcp, sockets):
-    for i in range(params["servers"]):
-        logging.info(f"Controller is waiting for connection")
+    global params
+    while len(sockets.items()) < params['servers']:
+        logging.info(f"Server is waiting for connection")
 
         connection, client_address = broadcast_tcp.accept()
 
-        logging.info(f"Controller established connection with {client_address}")
+        logging.info(f"Server established connection with {client_address}")
         sockets[client_address[0]] = connection
     return sockets
 
@@ -337,8 +338,7 @@ if __name__ == "__main__":
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-    send_sockets = {}
-    receive_sockets = {}
+    sockets = {}
 
     if algorithm.requires_synchronous_update_broadcast:
         broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -348,9 +348,9 @@ if __name__ == "__main__":
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
         broadcast_tcp_r.listen(1)
 
-        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp_s, send_sockets,))
+        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp_s, sockets,))
         receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp_r,
-                                                                                           receive_sockets,))
+                                                                                           sockets,))
         connectToServers.start()
         receiveConnections.start()
         for t in [connectToServers, receiveConnections]:
