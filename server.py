@@ -172,10 +172,10 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
-    broadcast_tcp(algorithm, server_state, server_id, sockets)
     while not server_state.is_finished():
+        broadcast_tcp(algorithm, server_state, server_id, sockets)
         try:
-            rtr, _, _ = select.select(list(sockets.values()), [], [], 1)
+            rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
         except socket.timeout:
             continue
         for r_socket in rtr:
