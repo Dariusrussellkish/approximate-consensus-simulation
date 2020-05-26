@@ -356,8 +356,6 @@ if __name__ == "__main__":
         for t in [connectToServers, receiveConnections]:
             t.join()
 
-        sockets = {**send_sockets, **receive_sockets}
-
         logger.info(f"Server {serverID} has connected to all other servers")
 
         serverBCast = threading.Thread(target=periodic_broadcast_tcp,
