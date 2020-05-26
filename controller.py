@@ -71,7 +71,7 @@ def get_wait_time(isDown, shape=3, scale=2):
     if isDown:
         wait = interp(wait, (0, 10), (0, 5))
     else:
-        wait = interp(wait, (0, 10), (0, 200))
+        wait = interp(wait, (0, 10), (0, 5))
     return wait
 
 
