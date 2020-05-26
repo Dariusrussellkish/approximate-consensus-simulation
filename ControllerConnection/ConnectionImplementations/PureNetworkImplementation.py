@@ -50,7 +50,8 @@ class PureNetworkImplementation:
             message = json.loads(data.decode('utf-8'))
         except json.decoder.JSONDecodeError:
             PureNetworkImplementation.logger.exception(
-                f"Server {self.server_id} encountered exception trying to process JSON: '{data.decode('utf-8').strip()}'")
+                f"Server {self.server_id} encountered exception trying to process "
+                f"JSON: '{data.decode('utf-8').strip()}'")
             raise DataNotPresentError
         return message
 

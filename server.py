@@ -157,7 +157,7 @@ def process_message(algorithm, server_state, controller_connection, server_id):
         if algorithm.is_done():
             break
         try:
-            bcastListenSocket.settimeout(0.5)
+            bcastListenSocket.settimeout(1)
             data, addr = bcastListenSocket.recvfrom(1024)
             if not data or not data.decode('utf-8').strip():
                 continue

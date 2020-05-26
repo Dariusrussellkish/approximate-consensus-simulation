@@ -5,7 +5,7 @@
   "eps": 0.001,
   "byzantine_send_p": 0.5,
   "byzantine_p": 0.1,
-  "broadcast_period": 100,
+  "broadcast_period": 50,
   "algorithm": "algorithm_1",
   "controller_implementation": "PureNetworkImplementation",
   "logging_server_ip": "10.0.0.1",
