@@ -58,7 +58,7 @@ class AlgorithmJACM86:
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
     def _set(self):
-        self.R = [[None for _ in range(self.nServers)] for _ in range(self.p_end + 1)]
+        self.R = [[None for _ in range(self.nServers)] for _ in range(int(self.p_end) + 2)]
         self.R[self.p][self.server_id] = self.v
 
     def is_done(self):
