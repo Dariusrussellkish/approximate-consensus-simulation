@@ -298,7 +298,8 @@ def process_controller_messages(server_state, controller_connection, server_id):
     return True
 
 
-def connect_to_tcp_servers(broadcast_tcp, sockets):
+def connect_to_tcp_servers(broadcast_tcp):
+    global sockets
     for ip in params['server_ips']:
         if ip == params['server_ips'][serverID]:
             continue
@@ -317,7 +318,7 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
 
 
 def receive_connection_tcp_servers(broadcast_tcp, sockets):
-    global params
+    global params, sockets
     while len(sockets.keys()) < params['servers'] - 1:
         logging.info(f"Server is waiting for connection")
         try:
@@ -352,9 +353,8 @@ if __name__ == "__main__":
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
         broadcast_tcp_r.listen(1)
 
-        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp_s, sockets,))
-        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp_r,
-                                                                                           sockets,))
+        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp_s,))
+        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp_r,))
         connectToServers.start()
         receiveConnections.start()
         for t in [connectToServers, receiveConnections]:
