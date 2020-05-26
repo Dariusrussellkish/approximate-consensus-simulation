@@ -335,9 +335,8 @@ if __name__ == "__main__":
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
         broadcast_tcp_r.listen(1)
 
-        for _ in range(params['servers']):
-            sockets = connect_to_tcp_servers(sockets, serverID)
-            sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets, serverID)
+        sockets = connect_to_tcp_servers(sockets, serverID)
+        sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets, serverID)
 
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
