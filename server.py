@@ -140,7 +140,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
             try:
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
-                        logger.debug(f"Server {server_id} is broadcasting to {ip}")
+                        logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 else:
                     s.sendall(message)
