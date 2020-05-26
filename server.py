@@ -138,7 +138,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
     if not state['is_down']:
-        for s in s_sockets.items():
+        for s in s_sockets.values():
             try:
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
@@ -192,7 +192,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
     while not server_state.is_finished():
         try:
-            rtr, _, _ = select.select(list(sockets.items()), [], [], 1)
+            rtr, _, _ = select.select(list(sockets.values()), [], [], 1)
         except socket.timeout:
             continue
         for r_socket in rtr:
@@ -316,7 +316,7 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
 
 def receive_connection_tcp_servers(broadcast_tcp, sockets):
     global params
-    while len(sockets.items()) < params['servers'] - 1:
+    while len(sockets.keys()) < params['servers'] - 1:
         logging.info(f"Server is waiting for connection")
 
         connection, client_address = broadcast_tcp.accept()
@@ -357,7 +357,7 @@ if __name__ == "__main__":
             t.join()
 
         logger.info(f"Server {serverID} has connected to all other servers")
-        logger.info(f"{list(sockets.items())}")
+        logger.info(f"{list(sockets.keys())}")
 
         serverBCast = threading.Thread(target=periodic_broadcast_tcp,
                                        args=(algorithm, server_state, serverID, sockets), name="serverBCast")
@@ -400,7 +400,7 @@ if __name__ == "__main__":
         if t is not main_thread:
             t.join()
 
-    for socket in sockets.items():
+    for socket in sockets.values():
         socket.close()
 
     controller_connection.cleanup()
