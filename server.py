@@ -300,7 +300,7 @@ def connect_to_tcp_servers(sockets, server_id):
     return sockets
 
 
-def receive_connection_tcp_servers(broadcast_tcp, sockets):
+def receive_connection_tcp_servers(broadcast_tcp, sockets, server_id):
     global params
     while len(sockets.keys()) < params['servers'] - 1:
         logging.info(f"Server is waiting for connections from "
@@ -336,8 +336,8 @@ if __name__ == "__main__":
         broadcast_tcp_r.listen(1)
 
         for _ in range(params['servers']):
-            sockets = connect_to_tcp_servers(sockets)
-            sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets)
+            sockets = connect_to_tcp_servers(sockets, serverID)
+            sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets, serverID)
 
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
