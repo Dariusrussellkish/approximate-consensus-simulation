@@ -77,9 +77,8 @@ class AlgorithmJACM86:
 
         filtered_R = __filter_list__(self.R)
         if len(filtered_R) >= self.nServers - self.f:
-            filtered_R = __filter_list__(self.R)
-            values = __trim__(filtered_R, self.f)
             if self.p <= self.p_end:
+                values = __trim__(filtered_R, self.f)
                 self.v = (max(values) + min(values)) / 2
                 self.p += 1
                 self._reset()
