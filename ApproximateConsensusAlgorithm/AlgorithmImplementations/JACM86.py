@@ -50,7 +50,6 @@ class AlgorithmJACM86:
         self.eps = eps
         self._reset()
         self.supports_byzantine = servers > 5 * f
-        self.a = 0.5 * ((servers - 5 * f) / (2 * (servers - f)))
         self.p_end = log(eps / K) / log(0.5)
         self.done_servers = [False for _ in range(servers)]
         self.done_values = [None for _ in range(servers)]
@@ -58,8 +57,11 @@ class AlgorithmJACM86:
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
     def _reset(self):
-        self.R = list([None for _ in range(self.nServers)])
+        self.R = [None for _ in range(self.nServers)]
         self.R[self.server_id] = self.v
+        for i, v in enumerate(self.done_servers):
+            if v:
+                self.R[i] = self.done_values[i]
 
     def is_done(self):
         return self.p > self.p_end
@@ -74,10 +76,7 @@ class AlgorithmJACM86:
             self.R[s_id] = message['v']
 
         filtered_R = __filter_list__(self.R)
-        if len(filtered_R) + sum(self.done_servers) >= self.nServers - self.f:
-            for i, v in enumerate(self.done_servers):
-                if v:
-                    self.R[i] = self.done_values[i]
+        if len(filtered_R) >= self.nServers - self.f:
             filtered_R = __filter_list__(self.R)
             values = __trim__(filtered_R, self.f)
             if self.p <= self.p_end:
