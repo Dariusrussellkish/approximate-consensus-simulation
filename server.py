@@ -140,8 +140,9 @@ def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
             bcast = select.select([], [bcastSocket], [])[1][0]
             broadcast(algorithm, server_state, server_id, bcast)
             time.sleep(params["broadcast_period"] / 1000)
-        bcast = select.select([], [bcastSocket], [])[1][0]
-        broadcast(algorithm, server_state, server_id, bcast)
+        if algorithm.is_done():
+            bcast = select.select([], [bcastSocket], [])[1][0]
+            broadcast(algorithm, server_state, server_id, bcast)
     finally:
         logger.info(f"Server {serverID} is exiting periodic_broadcast")
     return True

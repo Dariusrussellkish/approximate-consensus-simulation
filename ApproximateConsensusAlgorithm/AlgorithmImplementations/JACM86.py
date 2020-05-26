@@ -69,7 +69,9 @@ class AlgorithmJACM86:
 
     def process_message(self, message):
         s_id = message['id']
-        if message['is_done']:
+        if message['algorithm_is_done']:
+            AlgorithmJACM86.logger.info(f"Server {self.server_id} "
+                                        f"receiving done message from {s_id}")
             self.done_servers[s_id] = True
             self.done_values[s_id] = message['v']
 
@@ -92,4 +94,5 @@ class AlgorithmJACM86:
         return {
             'v': self.v,
             'p': self.p,
+            'algorithm_is_done': self.is_done()
         }
