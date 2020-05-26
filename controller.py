@@ -145,6 +145,10 @@ def unreliable_server(ip, server_id, byzantine, connection):
                 message = format_message(False, isDown)
             assert len(message) <= 1024
             connection.sendall(message)
+    except ConnectionResetError:
+        pass
+    except BrokenPipeError:
+        pass
     except:
         logging.exception(f"Controller encountered exception in unreliable server {server_id}")
     finally:
