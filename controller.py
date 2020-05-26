@@ -287,7 +287,7 @@ if __name__ == "__main__":
         # ensure basepath directory exists
         if not os.path.exists(basepath):
             os.makedirs(basepath)
-        unique = uuid.uuid4().hex
+        unique = sys.argv[2]
         with open(f"{basepath}/{unique}.pickle", 'wb') as fh:
             pickle.dump(
                 {
@@ -297,7 +297,7 @@ if __name__ == "__main__":
                     "all_start_time": all_started_time,
                 }, fh
             )
-        shutil.copytree("logs", f"data/logs_{unique}")
+        shutil.copytree("logs", f"data/logs_{unique}_{sys.argv[3]}")
         logging.info("Controller is finished")
 
     except:

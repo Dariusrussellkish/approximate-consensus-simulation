@@ -2,6 +2,7 @@ import json
 import sys
 import time
 import os
+import uuid
 
 from mininet.cli import CLI
 from mininet.log import setLogLevel
@@ -47,18 +48,22 @@ def start_mini(params):
 def start_simulation(params):
 
     for k in range(params["n_simulations"]):
+        unique = uuid.uuid4().hex
         os.system("mn --clean")
         net, hs = start_mini(params)
         print(f"Starting simulation {k}")
         print(f"Starting logging server on ip: {hs[0].IP}")
-        hs[0].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py {sys.argv[1]} > logs/logging_server.out 2>&1 &")
+        hs[0].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py "
+                  f"{sys.argv[1]} > logs/logging_server.out 2>&1 &")
 
         print(f"Starting controller on ip: {hs[1].IP}")
-        hs[1].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} > logs/controller.out 2>&1 &")
+        hs[1].cmd(f"python3 ~/approximate-consensus-simulation/controller.py {sys.argv[1]} "
+                  f"{unique} {k} > logs/controller.out 2>&1 &")
 
         for i in range(params["servers"]):
             print(f"Starting server {i} on ip: {hs[i+2].IP}")
-            hs[i+2].cmd(f"python3 ~/approximate-consensus-simulation/server.py {sys.argv[1]} {i} > logs/server_{i}.out 2>&1 &")
+            hs[i+2].cmd(f"python3 ~/approximate-consensus-simulation/server.py "
+                        f"{sys.argv[1]} {i} > logs/server_{i}.out 2>&1 &")
 
         while True:
             result = hs[0].cmd(f"ps -fe | grep controller")
