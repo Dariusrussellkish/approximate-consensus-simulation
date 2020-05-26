@@ -182,6 +182,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         if algorithm.requires_synchronous_update_broadcast and updated:
             bcast = select.select([], [bcastSocket], [])[1][0]
             broadcast(algorithm, server_state, server_id, bcast)
+            logging.info(f"Server {serverID} sent guaranteed update for phase {algorithm.algorith.p}")
 
         if updated:
             algo_state = algorithm.get_internal_state()
