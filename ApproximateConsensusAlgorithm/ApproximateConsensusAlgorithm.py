@@ -53,6 +53,11 @@ class ApproximateConsensusAlgorithm:
             raise ValueError(f"Algorithm {params[algorithm_key]} does not have sufficient "
                              f"n={params['servers']} for f={params['f']}")
 
+        if hasattr(self.algorithm, "requires_synchronous_update_broadcast"):
+            self.requires_synchronous_update_broadcast = self.algorithm.requires_synchronous_update_broadcast
+        else:
+            self.requires_synchronous_update_broadcast = False
+
     def get_internal_state(self):
         """
         Return algorithm internal state as Dict

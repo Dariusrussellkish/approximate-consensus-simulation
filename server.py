@@ -6,6 +6,7 @@ import socket
 import sys
 import threading
 import time
+import select
 from ApproximateConsensusAlgorithm.ApproximateConsensusAlgorithm import ApproximateConsensusAlgorithm
 from ControllerConnection.ControllerTimeoutError import ControllerTimeoutError
 from ControllerConnection.DataNotPresentError import DataNotPresentError
@@ -107,44 +108,44 @@ def format_message(state):
     return ret
 
 
-def periodic_broadcast(algorithm, server_state, server_id):
+def broadcast(algorithm, server_state, server_id, bcastSocket):
+    state = server_state.get_state()
+    algo_state = algorithm.get_internal_state()
+    message = format_message({**state, **algo_state})
+
+    if not state['is_down']:
+        logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
+
+    if algorithm.supports_byzantine() and not state['is_down'] and state['is_byzantine']:
+        for ip in params["server_ips"]:
+            # flip (biased) coin if we will send to server
+            if random.rand() > params["byzantine_send_p"]:
+                logger.debug(f"Server {serverID} is broadcasting to {ip}")
+                bcastSocket.sendto(message, (ip, params["server_port"]))
+
+    # if we are not byzantine or down, broadcast to all
+    elif not state['is_down']:
+        bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
+
+
+def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
     """
     Periodically broadcasts internal state based on period in parameter file
     """
-    bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
     logger.info(f"Server {server_id} starting to broadcast periodically")
 
     try:
         while not server_state.is_finished():
-            state = server_state.get_state()
-            algo_state = algorithm.get_internal_state()
-            message = format_message({**state, **algo_state})
-
-            if not state['is_down']:
-                logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
-
-            if algorithm.supports_byzantine() and not state['is_down'] and state['is_byzantine']:
-                for ip in params["server_ips"]:
-                    # flip (biased) coin if we will send to server
-                    if random.rand() > params["byzantine_send_p"]:
-                        logger.debug(f"Server {serverID} is broadcasting to {ip}")
-                        bcastSocket.sendto(message, (ip, params["server_port"]))
-
-            # if we are not byzantine or down, broadcast to all
-            elif not state['is_down']:
-                bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
-
+            bcast = select.select([], [bcastSocket], [])[0]
+            broadcast(algorithm, server_state, server_id, bcast)
             time.sleep(params["broadcast_period"] / 1000)
     finally:
-        bcastSocket.close()
         logger.info(f"Server {serverID} is exiting periodic_broadcast")
     return True
 
 
-def process_message(algorithm, server_state, controller_connection, server_id):
+def process_message(algorithm, server_state, controller_connection, server_id, bcastsocket):
     bcastListenSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -174,6 +175,10 @@ def process_message(algorithm, server_state, controller_connection, server_id):
         logger.debug(f"Server {server_id} received message from {message['id']}")
 
         updated = algorithm.process_message(message)
+
+        if algorithm.requires_synchronous_update_broadcast and updated:
+            bcast = select.select([], [bcastSocket], [])[0]
+            broadcast(algorithm, server_state, server_id, bcast)
 
         if updated:
             algo_state = algorithm.get_internal_state()
@@ -221,14 +226,18 @@ if __name__ == "__main__":
     algorithm = ApproximateConsensusAlgorithm(params, serverID)
     controller_connection = ControllerConnection(params, serverID)
 
+    bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
     logger.info(f"Server {serverID} connected with controller")
 
     serverBCast = threading.Thread(target=periodic_broadcast,
-                                   args=(algorithm, server_state, serverID), name="serverBCast")
+                                   args=(algorithm, server_state, serverID, bcastSocket), name="serverBCast")
     serverBCast.start()
 
     messageProcessor = threading.Thread(target=process_message,
-                                        args=(algorithm, server_state, controller_connection, serverID),
+                                        args=(algorithm, server_state, controller_connection, serverID, bcastSocket),
                                         name="messageProcessor")
     messageProcessor.start()
 
@@ -254,5 +263,6 @@ if __name__ == "__main__":
             t.join()
 
     controller_connection.cleanup()
+    bcastSocket.close()
 
     logger.info(f"Server {serverID} finished")

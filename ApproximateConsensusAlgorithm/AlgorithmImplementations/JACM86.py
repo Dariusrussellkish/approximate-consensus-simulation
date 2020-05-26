@@ -53,6 +53,7 @@ class AlgorithmJACM86:
         self._reset()
         self.supports_byzantine = servers > 5 * f
         self.p_end = log(eps / K) / log(0.5)
+        self.requires_synchronous_update_broadcast = True
         AlgorithmJACM86.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 

@@ -40,6 +40,7 @@ class AlgorithmBenOr:
         self.has_valid_n = servers > 2 * f
         self.eps = eps
         self._reset()
+        self.requires_synchronous_update_broadcast = True
         self.isDone = False
 
     def _reset(self):

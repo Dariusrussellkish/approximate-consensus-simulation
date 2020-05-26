@@ -17,6 +17,7 @@ class AlgorithmOne:
         self.has_valid_n = servers > 2 * f
         self.eps = eps
         self.p_end = log(eps / K) / log(float(f) / (servers - f))
+        self.requires_synchronous_update_broadcast = True
         self._reset()
         AlgorithmOne.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
