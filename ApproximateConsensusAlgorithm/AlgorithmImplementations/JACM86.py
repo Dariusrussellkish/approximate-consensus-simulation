@@ -78,7 +78,7 @@ class AlgorithmJACM86:
         if self.R[message['p']][s_id] is None:
             self.R[message['p']][s_id] = message['v']
 
-        filtered_R = __filter_list__(self.R)
+        filtered_R = __filter_list__(self.R[self.p])
         if len(filtered_R) >= self.nServers - self.f:
             if self.p <= self.p_end:
                 values = __trim__(filtered_R, self.f)
