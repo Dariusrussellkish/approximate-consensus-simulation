@@ -306,10 +306,12 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
         while not connected:
             try:
                 sockets[ip] = broadcast_tcp.connect((ip, params['server_port']))
+                logger.info(f"Server {serverID} connected with {ip}")
                 connected = True
             except ConnectionRefusedError:
                 logger.info(f"Server {serverID} connection refused, retrying")
             except OSError:
+                logger.info(f"Server {serverID} already connected with {ip}")
                 break
     return sockets
 
