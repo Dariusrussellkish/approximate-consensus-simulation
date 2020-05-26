@@ -292,7 +292,8 @@ def connect_to_tcp_servers(sockets):
                 logger.info(f"Server {serverID} connected with {ip}")
                 connected = True
             except ConnectionRefusedError:
-                logger.info(f"Server {serverID} connection refused, retrying")
+                logger.info(f"Server {serverID} connection refused to {ip}, retrying")
+                break
             except OSError as e:
                 logger.exception("Server received error")
                 logger.info(f"Server {serverID} already connected with {ip}")
