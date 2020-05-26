@@ -80,7 +80,7 @@ if __name__ == "__main__":
         params = json.load(fh)
     try:
         os.system("mn --clean")
-        os.system("rm /logs/logging_server.log")
+        os.system("rm logs/logging_server.log")
         if not os.path.exists('logs'):
             os.makedirs('logs')
         start_simulation(params)
