@@ -115,14 +115,14 @@ def broadcast(algorithm, server_state, server_id, bcastSocket):
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
 
-    if not state['is_down']:
-        logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
+    # if not state['is_down']:
+    #     logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
 
     if algorithm.supports_byzantine() and not state['is_down'] and state['is_byzantine']:
         for ip in params["server_ips"]:
             # flip (biased) coin if we will send to server
             if random.rand() > params["byzantine_send_p"]:
-                logger.debug(f"Server {serverID} is broadcasting to {ip}")
+                # logger.debug(f"Server {serverID} is broadcasting to {ip}")
                 bcastSocket.sendto(message, (ip, params["server_port"]))
 
     # if we are not byzantine or down, broadcast to all
@@ -140,7 +140,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
             try:
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
-                        logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                        # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 else:
                     s.sendall(message)
@@ -187,7 +187,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            logger.debug(f"Server {server_id} received message from {message['id']}")
+            # logger.debug(f"Server {server_id} received message from {message['id']}")
             updated = algorithm.process_message(message)
 
             if updated:
