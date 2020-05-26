@@ -344,8 +344,9 @@ if __name__ == "__main__":
         broadcast_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         broadcast_tcp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
-        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(send_sockets,))
-        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(receive_sockets,))
+        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp, send_sockets,))
+        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp,
+                                                                                           receive_sockets,))
         connectToServers.start()
         receiveConnections.start()
         for t in [connectToServers, receiveConnections]:
