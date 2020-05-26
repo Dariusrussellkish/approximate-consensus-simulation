@@ -91,7 +91,8 @@ socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
 rootLogger.addHandler(socketHandler)
 logger = logging.getLogger('Server')
 
-tcp_broadcast_lock = threading.Lock()
+has_broadcasted_phase = False
+
 
 def format_message(state):
     """
@@ -132,25 +133,22 @@ def broadcast(algorithm, server_state, server_id, bcastSocket):
 
 
 def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
-    global params, tcp_broadcast_lock
-    tcp_broadcast_lock.acquire()
-    try:
-        state = server_state.get_state()
-        algo_state = algorithm.get_internal_state()
-        message = format_message({**state, **algo_state})
-        if not state['is_down']:
-            for s in s_sockets.items():
-                try:
-                    if algorithm.supports_byzantine() and state['is_byzantine']:
-                        if random.rand() > params["byzantine_send_p"]:
-                            logger.debug(f"Server {serverID} is broadcasting to {ip}")
-                            s.sendall(message)
-                    else:
+    global params, has_broadcasted_phase
+    state = server_state.get_state()
+    algo_state = algorithm.get_internal_state()
+    message = format_message({**state, **algo_state})
+    if not state['is_down']:
+        for s in s_sockets.items():
+            try:
+                if algorithm.supports_byzantine() and state['is_byzantine']:
+                    if random.rand() > params["byzantine_send_p"]:
+                        logger.debug(f"Server {server_id} is broadcasting to {ip}")
                         s.sendall(message)
-                except IOError:
-                    continue
-    finally:
-        tcp_broadcast_lock.release()
+                else:
+                    s.sendall(message)
+            except IOError:
+                pass
+        has_broadcasted_phase = True
 
 
 def periodic_broadcast_tcp(algorithm, server_state, server_id, s_sockets):
@@ -187,13 +185,14 @@ def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
     return True
 
 
-def process_messages_tcp(algorithm, server_state, controller_connection, server_id, r_sockets, s_sockets):
+def process_messages_tcp(algorithm, server_state, controller_connection, server_id, sockets):
+    global has_broadcasted_phase
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
     while not server_state.is_finished():
         try:
-            rtr, _, _ = select.select(r_sockets.items(), [], [], 1)
+            rtr, _, _ = select.select(sockets.items(), [], [], 1)
         except socket.timeout:
             continue
         for r_socket in rtr:
@@ -216,8 +215,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 controller_connection.send_state(message)
 
             if algorithm.requires_synchronous_update_broadcast and updated:
-                broadcast_tcp(algorithm, server_state, server_id, s_sockets)
-                logging.info(f"Server {serverID} sent guaranteed update for phase {algorithm.algorithm.p}")
+                has_broadcasted_phase = False
 
             # let the controller know we are done
             if algorithm.is_done():
@@ -311,6 +309,8 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
                 connected = True
             except ConnectionRefusedError:
                 logger.info(f"Server {serverID} connection refused, retrying")
+            except OSError:
+                break
     return sockets
 
 
@@ -356,15 +356,17 @@ if __name__ == "__main__":
         for t in [connectToServers, receiveConnections]:
             t.join()
 
+        sockets = {**send_sockets, **receive_sockets}
+
         logger.info(f"Server {serverID} has connected to all other servers")
 
         serverBCast = threading.Thread(target=periodic_broadcast_tcp,
-                                       args=(algorithm, server_state, serverID, send_sockets), name="serverBCast")
+                                       args=(algorithm, server_state, serverID, sockets), name="serverBCast")
         serverBCast.start()
 
         messageProcessor = threading.Thread(target=process_messages_tcp,
                                             args=(algorithm, server_state, controller_connection,
-                                                  serverID, receive_sockets, send_sockets),
+                                                  serverID, sockets),
                                             name="messageProcessor")
         messageProcessor.start()
 
