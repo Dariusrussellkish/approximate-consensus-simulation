@@ -278,15 +278,17 @@ def process_controller_messages(server_state, controller_connection, server_id):
     return True
 
 
-def connect_to_tcp_servers(broadcast_tcp, sockets):
+def connect_to_tcp_servers(sockets):
     logger.info(f"{sockets.keys()}")
     for ip in params['server_ips']:
         if ip == params['server_ips'][serverID]:
             continue
+        broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        broadcast_tcp_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         connected = False
         while not connected:
             try:
-                sockets[ip] = broadcast_tcp.connect((ip, params['server_port']))
+                sockets[ip] = broadcast_tcp_s.connect((ip, params['server_port']))
                 logger.info(f"Server {serverID} connected with {ip}")
                 connected = True
             except ConnectionRefusedError:
@@ -312,6 +314,7 @@ def receive_connection_tcp_servers(broadcast_tcp, sockets):
             pass
     return sockets
 
+
 if __name__ == "__main__":
     logger.info(f"Server {serverID} is beginning simulation")
 
@@ -332,7 +335,7 @@ if __name__ == "__main__":
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
         broadcast_tcp_r.listen(1)
 
-        sockets = connect_to_tcp_servers(broadcast_tcp_r, sockets)
+        sockets = connect_to_tcp_servers(sockets)
         sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets)
 
         logger.info(f"Server {serverID} has connected to all other servers")
