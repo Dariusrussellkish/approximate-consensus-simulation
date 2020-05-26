@@ -316,7 +316,7 @@ def connect_to_tcp_servers(broadcast_tcp, sockets):
 
 def receive_connection_tcp_servers(broadcast_tcp, sockets):
     global params
-    while len(sockets.items()) < params['servers']:
+    while len(sockets.items()) < params['servers'] - 1:
         logging.info(f"Server is waiting for connection")
 
         connection, client_address = broadcast_tcp.accept()
