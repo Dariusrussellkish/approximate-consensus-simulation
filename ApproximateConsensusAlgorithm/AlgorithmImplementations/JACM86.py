@@ -48,11 +48,11 @@ class AlgorithmJACM86:
         self.p = 0
         self.f = f
         self.eps = eps
+        self.done_servers = [False for _ in range(servers)]
+        self.done_values = [None for _ in range(servers)]
         self._reset()
         self.supports_byzantine = servers > 5 * f
         self.p_end = log(eps / K) / log(0.5)
-        self.done_servers = [False for _ in range(servers)]
-        self.done_values = [None for _ in range(servers)]
         AlgorithmJACM86.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
