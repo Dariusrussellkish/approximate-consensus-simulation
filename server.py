@@ -278,8 +278,7 @@ def process_controller_messages(server_state, controller_connection, server_id):
     return True
 
 
-def connect_to_tcp_servers(broadcast_tcp):
-    global sockets
+def connect_to_tcp_servers(broadcast_tcp, sockets):
     for ip in params['server_ips']:
         if ip == params['server_ips'][serverID]:
             continue
@@ -294,13 +293,13 @@ def connect_to_tcp_servers(broadcast_tcp):
             except OSError:
                 logger.info(f"Server {serverID} already connected with {ip}")
                 break
-    return sockets
 
 
-def receive_connection_tcp_servers(broadcast_tcp):
-    global params, sockets
+def receive_connection_tcp_servers(broadcast_tcp, sockets):
+    global params
     while len(sockets.keys()) < params['servers'] - 1:
-        logging.info(f"Server is waiting for connection")
+        logging.info(f"Server is waiting for connections from "
+                     f"{(params['servers'] - 1) - len(sockets.keys())} more servers")
         try:
             broadcast_tcp.settimeout(1)
             connection, client_address = broadcast_tcp.accept()
@@ -308,7 +307,6 @@ def receive_connection_tcp_servers(broadcast_tcp):
             sockets[client_address[0]] = connection
         except socket.timeout:
             pass
-    return sockets
 
 
 if __name__ == "__main__":
@@ -326,19 +324,13 @@ if __name__ == "__main__":
     sockets = {}
 
     if algorithm.requires_synchronous_update_broadcast:
-        broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        broadcast_tcp_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         broadcast_tcp_r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         broadcast_tcp_r.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
         broadcast_tcp_r.listen(1)
 
-        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(broadcast_tcp_s,))
-        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(broadcast_tcp_r,))
-        connectToServers.start()
-        receiveConnections.start()
-        for t in [connectToServers, receiveConnections]:
-            t.join()
+        connect_to_tcp_servers(broadcast_tcp_r, sockets)
+        receive_connection_tcp_servers(broadcast_tcp_r, sockets)
 
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
