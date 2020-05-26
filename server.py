@@ -191,6 +191,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             updated = algorithm.process_message(message)
 
             if updated:
+                broadcast_tcp(algorithm, server_state, server_id, sockets)
                 algo_state = algorithm.get_internal_state()
                 state = server_state.get_state()
                 message = format_message({**state, **algo_state})
