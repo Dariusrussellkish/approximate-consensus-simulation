@@ -87,8 +87,8 @@ class AlgorithmBenOr:
 
     def get_internal_state(self):
         return {
-            'phase': self.phase,
-            'v': self.v,
-            'p': int(self.p),
-            'w': self.w
+            "phase": self.phase,
+            "v": self.v,
+            "p": int(self.p),
+            "w": self.w
         }

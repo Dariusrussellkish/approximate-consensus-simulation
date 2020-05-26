@@ -96,7 +96,7 @@ class AlgorithmJACM86:
 
     def get_internal_state(self):
         return {
-            'v': self.v,
-            'p': self.p,
-            'algorithm_is_done': self.is_done()
+            "v": self.v,
+            "p": self.p,
+            "algorithm_is_done": self.is_done()
         }
