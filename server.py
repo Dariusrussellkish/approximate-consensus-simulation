@@ -17,7 +17,7 @@ from numpy import random
 
 class ServerState:
     logger = logging.getLogger('Server')
-    
+
     def __init__(self, server_id):
         self.server_id = server_id
         self.is_down = True
@@ -91,6 +91,7 @@ socketHandler = logging.handlers.SocketHandler(params["logging_server_ip"],
 rootLogger.addHandler(socketHandler)
 logger = logging.getLogger('Server')
 
+tcp_broadcast_lock = threading.Lock()
 
 def format_message(state):
     """
@@ -109,6 +110,8 @@ def format_message(state):
 
 
 def broadcast(algorithm, server_state, server_id, bcastSocket):
+    global params
+
     state = server_state.get_state()
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
@@ -128,13 +131,49 @@ def broadcast(algorithm, server_state, server_id, bcastSocket):
         bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
 
 
+def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
+    global params, tcp_broadcast_lock
+    tcp_broadcast_lock.acquire()
+    try:
+        state = server_state.get_state()
+        algo_state = algorithm.get_internal_state()
+        message = format_message({**state, **algo_state})
+        if not state['is_down']:
+            for s in s_sockets.items():
+                try:
+                    if algorithm.supports_byzantine() and state['is_byzantine']:
+                        if random.rand() > params["byzantine_send_p"]:
+                            logger.debug(f"Server {serverID} is broadcasting to {ip}")
+                            s.sendall(message)
+                    else:
+                        s.sendall(message)
+                except IOError:
+                    continue
+    finally:
+        tcp_broadcast_lock.release()
+
+
+def periodic_broadcast_tcp(algorithm, server_state, server_id, s_sockets):
+    global params
+    logger.info(f"Server {server_id} starting to broadcast periodically")
+    try:
+        while not server_state.is_finished():
+            broadcast_tcp(algorithm, server_state, server_id, s_sockets)
+            time.sleep(params["broadcast_period"] / 1000)
+        if algorithm.is_done():
+            broadcast_tcp(algorithm, server_state, server_id, s_sockets)
+    finally:
+        logger.info(f"Server {serverID} is exiting periodic_broadcast")
+    return True
+
+
 def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
     """
     Periodically broadcasts internal state based on period in parameter file
     """
+    global params
 
     logger.info(f"Server {server_id} starting to broadcast periodically")
-
     try:
         while not server_state.is_finished():
             bcast = select.select([], [bcastSocket], [])[1][0]
@@ -146,6 +185,49 @@ def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
     finally:
         logger.info(f"Server {serverID} is exiting periodic_broadcast")
     return True
+
+
+def process_messages_tcp(algorithm, server_state, controller_connection, server_id, r_sockets, s_sockets):
+    logger.info(f"Server {server_id} starting to process broadcast messages")
+    signaled_controller = False
+
+    while not server_state.is_finished():
+        try:
+            rtr, _, _ = select.select(r_sockets.keys(), [], [], timeout=1)
+        except socket.timeout:
+            continue
+        for r_socket in rtr:
+            data = r_socket.recv(1024)
+            if not data or not data.decode('utf-8').strip():
+                continue
+            message = json.loads(data.decode('utf-8'))
+
+            if message["id"] == server_id:
+                continue
+
+            logger.debug(f"Server {server_id} received message from {message['id']}")
+            updated = algorithm.process_message(message)
+
+            if updated:
+                algo_state = algorithm.get_internal_state()
+                state = server_state.get_state()
+                message = format_message({**state, **algo_state})
+                logging.info(f"Server {serverID} is sending state update to controller")
+                controller_connection.send_state(message)
+
+            if algorithm.requires_synchronous_update_broadcast and updated:
+                broadcast_tcp(algorithm, server_state, server_id, s_sockets)
+                logging.info(f"Server {serverID} sent guaranteed update for phase {algorithm.algorithm.p}")
+
+            # let the controller know we are done
+            if algorithm.is_done():
+                if not signaled_controller:
+                    logging.info(f"Server {serverID} letting controller know they are done")
+                    state = server_state.get_state()
+                    algo_state = algorithm.get_internal_state()
+                    message = format_message({**state, **algo_state})
+                    controller_connection.send_state(message)
+                    signaled_controller = True
 
 
 def process_message(algorithm, server_state, controller_connection, server_id, bcastsocket):
@@ -178,11 +260,6 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         logger.debug(f"Server {server_id} received message from {message['id']}")
 
         updated = algorithm.process_message(message)
-
-        if algorithm.requires_synchronous_update_broadcast and updated:
-            bcast = select.select([], [bcastSocket], [])[1][0]
-            broadcast(algorithm, server_state, server_id, bcast)
-            logging.info(f"Server {serverID} sent guaranteed update for phase {algorithm.algorithm.p}")
 
         if updated:
             algo_state = algorithm.get_internal_state()
@@ -223,27 +300,76 @@ def process_controller_messages(server_state, controller_connection, server_id):
     return True
 
 
+def connect_to_tcp_servers(broadcast_tcp, sockets):
+    for ip in params['server_ips']:
+        if ip == params['server_ips'][serverID]:
+            continue
+        connected = False
+        while not connected:
+            try:
+                sockets[ip] = broadcast_tcp.connect((ip, params['server_port']))
+                connected = True
+            except ConnectionRefusedError:
+                logger.info(f"Server {serverID} connection refused, retrying")
+    return sockets
+
+
+def receive_connection_tcp_servers(broadcast_tcp, sockets):
+    for i in range(params["servers"]):
+        logging.info(f"Controller is waiting for connection")
+
+        connection, client_address = broadcast_tcp.accept()
+
+        logging.info(f"Controller established connection with {client_address}")
+        sockets[client_address[0]] = connection
+    return sockets
+
+
 if __name__ == "__main__":
     logger.info(f"Server {serverID} is beginning simulation")
 
     server_state = ServerState(serverID)
     algorithm = ApproximateConsensusAlgorithm(params, serverID)
     controller_connection = ControllerConnection(params, serverID)
+    logger.info(f"Server {serverID} connected with controller")
 
     bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-    logger.info(f"Server {serverID} connected with controller")
+    send_sockets = {}
+    receive_sockets = {}
 
-    serverBCast = threading.Thread(target=periodic_broadcast,
-                                   args=(algorithm, server_state, serverID, bcastSocket), name="serverBCast")
-    serverBCast.start()
+    if algorithm.requires_synchronous_update_broadcast:
+        broadcast_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        broadcast_tcp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
-    messageProcessor = threading.Thread(target=process_message,
-                                        args=(algorithm, server_state, controller_connection, serverID, bcastSocket),
-                                        name="messageProcessor")
-    messageProcessor.start()
+        connectToServers = threading.Thread(target=connect_to_tcp_servers, args=(send_sockets,))
+        receiveConnections = threading.Thread(target=receive_connection_tcp_servers, args=(receive_sockets,))
+        connectToServers.start()
+        receiveConnections.start()
+        for t in [connectToServers, receiveConnections]:
+            t.join()
+
+        serverBCast = threading.Thread(target=periodic_broadcast_tcp,
+                                       args=(algorithm, server_state, serverID, send_sockets), name="serverBCast")
+        serverBCast.start()
+
+        messageProcessor = threading.Thread(target=process_messages_tcp,
+                                            args=(algorithm, server_state, controller_connection,
+                                                  serverID, receive_sockets, send_sockets),
+                                            name="messageProcessor")
+        messageProcessor.start()
+
+    else:
+        serverBCast = threading.Thread(target=periodic_broadcast,
+                                       args=(algorithm, server_state, serverID, bcastSocket), name="serverBCast")
+        serverBCast.start()
+
+        messageProcessor = threading.Thread(target=process_message,
+                                            args=(algorithm, server_state, controller_connection, serverID, bcastSocket),
+                                            name="messageProcessor")
+        messageProcessor.start()
 
     controllerListener = threading.Thread(target=process_controller_messages,
                                           args=(server_state, controller_connection, serverID),
@@ -265,6 +391,12 @@ if __name__ == "__main__":
     for t in threading.enumerate():
         if t is not main_thread:
             t.join()
+
+    for socket in receive_sockets.items():
+        socket.close()
+
+    for socket in send_sockets.items():
+        socket.close()
 
     controller_connection.cleanup()
     bcastSocket.close()
