@@ -320,11 +320,13 @@ def receive_connection_tcp_servers(broadcast_tcp, sockets):
     global params
     while len(sockets.keys()) < params['servers'] - 1:
         logging.info(f"Server is waiting for connection")
-
-        connection, client_address = broadcast_tcp.accept()
-
-        logging.info(f"Server established connection with {client_address}")
-        sockets[client_address[0]] = connection
+        try:
+            broadcast_tcp.settimeout(1)
+            connection, client_address = broadcast_tcp.accept()
+            logging.info(f"Server established connection with {client_address}")
+            sockets[client_address[0]] = connection
+        except socket.timeout:
+            pass
     return sockets
 
 
