@@ -60,8 +60,10 @@ class AlgorithmBenOr:
         if self.futures[self.p]:
             for message in self.futures.values():
                 AlgorithmBenOr.logger.info(
-                    f"Server {self.server_id} processing future p={message['p']} "
-                    f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
+                    f"Server {self.server_id} processing future {message}")
+                # AlgorithmBenOr.logger.info(
+                #     f"Server {self.server_id} processing future p={message['p']} "
+                #     f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
                 if message['phase'] == 1:
                     self.R[message['id']] = message['v']
                 else:
