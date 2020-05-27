@@ -72,11 +72,11 @@ class AlgorithmBenOr:
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} received future p={message['p']} phase {message['phase']} from {s_id}")
             self.futures[message['p']].append(message)
-        if message['p'] == self.p and message['phase'] == 1:
+        if message['p'] == self.p and self.R[s_id] is None and message['phase'] == 1:
             # AlgorithmBenOr.logger.info(
             #     f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
             self.R[s_id] = message['v']
-        elif message['p'] == self.p and message['phase'] == 2:
+        elif message['p'] == self.p and self.S[s_id] is None and message['phase'] == 2:
             # AlgorithmBenOr.logger.info(
             #     f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
             self.S[s_id] = message['w']
