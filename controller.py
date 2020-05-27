@@ -201,6 +201,8 @@ def process_server_states():
             max_v = 0
             servers_to_check = list(serverStates.keys())
             for server in servers_to_check:
+                if not serverStates[server]:
+                    continue
                 value = serverStates[server][-1]['v']
                 if value < min_v:
                     min_v = value
