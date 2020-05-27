@@ -208,7 +208,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         for r_socket in rtr:
             try:
                 final_data = b''
-                data = r_socket.recv(1024-len(final_data))
+                data = r_socket.recv(1024-len(messages[r_socket]))
                 if not data:
                     continue
                 messages[r_socket] += data
@@ -231,6 +231,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 continue
 
             if algorithm.algorithm.p >= message['p'] and state['is_down']:
+                logging.info(f"Server {serverID} received from {message['id']} but is down, skipping")
                 continue
 
             updated = algorithm.process_message(message)
