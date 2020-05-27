@@ -92,6 +92,8 @@ class AlgorithmBenOr:
             else:
                 self.w = -1
                 self.S[self.p] = -1
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} moving to phase 2, phase is {self.p}")
             self.phase = 2
         elif self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
             values = __filter_list__(self.S, remove=[None, -1])
