@@ -49,7 +49,6 @@ class AlgorithmBenOr:
         self.R = list([None for _ in range(self.nServers)])
         self.S = list([None for _ in range(self.nServers)])
         self.R[self.server_id] = self.v
-        self.S[self.server_id] = self.w
         self.w = None
 
     def is_done(self):
