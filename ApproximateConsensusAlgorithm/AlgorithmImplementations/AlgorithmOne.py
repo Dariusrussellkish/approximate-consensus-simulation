@@ -12,6 +12,7 @@ class AlgorithmOne:
         self.server_id: int = server_id
         self.v = random.uniform(0, K)
         self.p = 0
+        self.phase = 1
         self.f = f
         self.supports_byzantine = False
         self.has_valid_n = servers > 2 * f
@@ -26,14 +27,23 @@ class AlgorithmOne:
         return self.p > self.p_end
 
     def _reset(self):
-        self.R = [0 for _ in range(self.nServers)]
+        self.R = [0. for _ in range(self.nServers)]
         self.R[self.server_id] = self.v
 
     def process_message(self, message):
-        pass
+        s_id = message['id']
+        if self.R[s_id] == 0:
+            self.R[s_id] = message['v']
+            if sum(self.R) >= self.nServers - self.f:
+                self.v = (max(self.R) + min(self.R)) / 2.0
+                self.p += 1
+                self.R[self.p] = self.v
+                return True
+        return False
 
     def get_internal_state(self):
         return {
             'v': self.v,
-            'p': self.p
+            'p': self.p,
+            'phase': self.phase
         }
