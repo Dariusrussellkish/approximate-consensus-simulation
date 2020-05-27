@@ -136,9 +136,25 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state, 'updated': updated})
     retry_sockets = {}
-    if not state['is_down'] or updated:
-        # logger.info(f"Server {server_id} is beginning broadcast")
-        for s in s_sockets.values():
+    for s in s_sockets.values():
+        try:
+            s.settimeout(0.1)
+            if algorithm.supports_byzantine() and state['is_byzantine']:
+                if random.rand() > params["byzantine_send_p"]:
+                    logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                    s.sendall(message)
+            else:
+                # logger.info(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                s.sendall(message)
+        except socket.timeout:
+            # logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
+            retry_sockets[s] = True
+        except IOError:
+            pass
+    while len(retry_sockets.keys()) > 0:
+        retry_sockets_list = list(retry_sockets.keys())
+        for s in retry_sockets_list:
+            retry_sockets.pop(s)
             try:
                 s.settimeout(0.1)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
@@ -149,29 +165,10 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     # logger.info(f"Server {server_id} is broadcasting to {s.getpeername()}")
                     s.sendall(message)
             except socket.timeout:
-                # logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
+                # logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                 retry_sockets[s] = True
             except IOError:
                 pass
-        while len(retry_sockets.keys()) > 0:
-            retry_sockets_list = list(retry_sockets.keys())
-            for s in retry_sockets_list:
-                retry_sockets.pop(s)
-                try:
-                    s.settimeout(0.1)
-                    if algorithm.supports_byzantine() and state['is_byzantine']:
-                        if random.rand() > params["byzantine_send_p"]:
-                            logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
-                            s.sendall(message)
-                    else:
-                        # logger.info(f"Server {server_id} is broadcasting to {s.getpeername()}")
-                        s.sendall(message)
-                except socket.timeout:
-                    # logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
-                    retry_sockets[s] = True
-                except IOError:
-                    pass
-        # logger.info(f"Server {server_id} is done with broadcast")
 
 
 def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
@@ -201,6 +198,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
     messages = {s: b'' for s in sockets.values()}
     message_queue = []
+    time.sleep(1)
     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
         state = server_state.get_state()
