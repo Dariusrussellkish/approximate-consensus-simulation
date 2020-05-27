@@ -1,5 +1,6 @@
 import logging
 import random
+from collections import defaultdict
 from numpy import unique
 
 
@@ -39,6 +40,7 @@ class AlgorithmBenOr:
         self.supports_byzantine = False
         self.has_valid_n = servers > 2 * f
         self.eps = eps
+        self.futures = defaultdict(list)
         self._reset()
         self.requires_synchronous_update_broadcast = True
         self.isDone = False
@@ -55,9 +57,24 @@ class AlgorithmBenOr:
 
     def process_message(self, message):
         s_id = message['id']
+
+        if self.futures[self.p]:
+            for i in range(len(self.futures[self.p])):
+                message = self.futures[self.p].pop()
+                if message['phase'] == 1:
+                    self.R[s_id] = message['v']
+                else:
+                    self.S[s_id] = message['w']
+
+        if message['p'] > self.p:
+            self.futures[message['p']].append(message)
         if message['p'] == self.p and message['phase'] == 1:
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
             self.R[s_id] = message['v']
         elif message['p'] == self.p and message['phase'] == 2:
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
             self.S[s_id] = message['w']
 
         filtered_R = __filter_list__(self.R)
