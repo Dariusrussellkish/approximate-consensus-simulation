@@ -175,7 +175,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
     while not server_state.is_finished():
         broadcast_tcp(algorithm, server_state, server_id, sockets)
-        rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
+        rtr, _, _ = select.select(list(sockets.values()), [], [], 0.5)
         for r_socket in rtr:
             try:
                 final_data = b''
@@ -199,7 +199,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            broadcast_tcp(algorithm, server_state, server_id, sockets)
             # logger.debug(f"Server {server_id} received message from {message['id']}")
             updated = algorithm.process_message(message)
 
