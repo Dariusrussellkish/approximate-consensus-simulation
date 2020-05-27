@@ -226,6 +226,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         try:
             bcastListenSocket.settimeout(0.5)
             data, addr = bcastListenSocket.recvfrom(1024)
+            logging.info(f"Server {server_id} received: {data.decode('utf-8').strip()}")
             if not data:
                 continue
             try:
