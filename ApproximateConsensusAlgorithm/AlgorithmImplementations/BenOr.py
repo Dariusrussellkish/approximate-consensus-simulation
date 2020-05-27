@@ -64,7 +64,9 @@ class AlgorithmBenOr:
                 message = self.futures[self.p].pop(0)
                 if message['phase'] == 1:
                     self.R[message['id']] = message['v']
+                    self.S[message['id']] = message['w']
                 else:
+                    self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
 
         if message['p'] > self.p:
