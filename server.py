@@ -233,7 +233,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
         p = algorithm.algorithm.p
         phase = algorithm.algorithm.phase
-        if not state['is_down'] and len(message_queue[p][phase]) > 0:
+        if len(message_queue[p][phase]) > 0:
             queue_length = len(message_queue[p][phase])
             for _ in range(queue_length):
                 message = message_queue[p][phase].pop(0)
