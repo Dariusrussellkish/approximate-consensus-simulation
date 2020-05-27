@@ -188,11 +188,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if len(received_data_amounts[ip]) < 1024:
                 logging.info(f"Server {server_id} received chunk, now is: "
                              f"{received_data_amounts[ip].decode('utf-8').strip()}")
-                received_data_amounts[ip] += data
+                received_data_amounts[ip] = received_data_amounts[ip] + data
                 continue
             try:
                 message = json.loads(received_data_amounts[ip].decode('utf-8'))
-                received_data_amounts[ip] = []
+                received_data_amounts[ip] = b''
             except json.decoder.JSONDecodeError:
                 logging.exception(f"Server {server_id} encountered error parsing "
                                   f"JSON: {received_data_amounts[ip].decode('utf-8').strip()}")
