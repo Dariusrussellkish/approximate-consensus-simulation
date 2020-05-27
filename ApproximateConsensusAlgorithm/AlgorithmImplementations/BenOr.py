@@ -70,6 +70,7 @@ class AlgorithmBenOr:
                     self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
             self.futures[self.p] = {}
+            should_update = True
 
         if message['p'] > self.p and not message['id'] in self.futures[message['p']]:
             AlgorithmBenOr.logger.info(
