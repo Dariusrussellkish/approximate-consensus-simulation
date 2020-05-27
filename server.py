@@ -7,6 +7,8 @@ import sys
 import threading
 import time
 import select
+from collections import defaultdict
+
 from ApproximateConsensusAlgorithm.ApproximateConsensusAlgorithm import ApproximateConsensusAlgorithm
 from ControllerConnection.ControllerTimeoutError import ControllerTimeoutError
 from ControllerConnection.DataNotPresentError import DataNotPresentError
@@ -197,11 +199,10 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     signaled_controller = False
 
     messages = {s: b'' for s in sockets.values()}
-    message_queue = []
+    message_queue = defaultdict(lambda: defaultdict(list))
     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
         state = server_state.get_state()
-        broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
         rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
         for r_socket in rtr:
             try:
@@ -228,31 +229,33 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            message_queue.append(message)
+            message_queue[message['p']][message['phase']].append(message)
 
-            if not state['is_down'] and len(message_queue) > 0:
-                queue_length = len(message_queue)
-                for _ in range(queue_length):
-                    message = message_queue.pop(0)
+        p = algorithm.algorithm.p
+        phase = algorithm.algorithm.phase
+        if not state['is_down'] and len(message_queue[p][phase]) > 0:
+            queue_length = len(message_queue)
+            for _ in range(queue_length):
+                message = message_queue.pop(0)
+                updated = algorithm.process_message(message)
 
-                    updated = algorithm.process_message(message)
-
-                    if updated:
-                        algo_state = algorithm.get_internal_state()
-                        state = server_state.get_state()
-                        message = format_message({**state, **algo_state})
-                        logging.info(f"Server {serverID} is sending state update to controller")
-                        controller_connection.send_state(message)
+                if updated:
+                    algo_state = algorithm.get_internal_state()
+                    state = server_state.get_state()
+                    broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
+                    message = format_message({**state, **algo_state})
+                    logging.info(f"Server {serverID} is sending state update to controller")
+                    controller_connection.send_state(message)
 
             # let the controller know we are done
-            if algorithm.is_done():
-                if not signaled_controller:
-                    logging.info(f"Server {serverID} letting controller know they are done")
-                    state = server_state.get_state()
-                    algo_state = algorithm.get_internal_state()
-                    message = format_message({**state, **algo_state})
-                    controller_connection.send_state(message)
-                    signaled_controller = True
+        if algorithm.is_done():
+            if not signaled_controller:
+                logging.info(f"Server {serverID} letting controller know they are done")
+                state = server_state.get_state()
+                algo_state = algorithm.get_internal_state()
+                message = format_message({**state, **algo_state})
+                controller_connection.send_state(message)
+                signaled_controller = True
 
 
 def process_message(algorithm, server_state, controller_connection, server_id, bcastsocket):
