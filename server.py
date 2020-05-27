@@ -173,7 +173,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
-    received_data_amounts = {ip: [] for ip in params['server_ips']}
+    received_data_amounts = {ip: b'' for ip in params['server_ips']}
     while not server_state.is_finished():
         broadcast_tcp(algorithm, server_state, server_id, sockets)
         try:
@@ -181,8 +181,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         except socket.timeout:
             continue
         for r_socket in rtr:
-            data = r_socket.recv(1024)
             ip = r_socket.getpeername()[0]
+            data = r_socket.recv(1024-len(received_data_amounts[ip]))
             if not data or not data.decode('utf-8').strip():
                 continue
             if len(received_data_amounts[ip]) < 1024:
