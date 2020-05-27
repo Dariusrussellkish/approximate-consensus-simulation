@@ -177,7 +177,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     while not server_state.is_finished():
         broadcast_tcp(algorithm, server_state, server_id, sockets)
         try:
-            rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
+            rtr, _, _ = select.select(list(sockets.values()), [], [], 5)
         except socket.timeout:
             continue
         for r_socket in rtr:
