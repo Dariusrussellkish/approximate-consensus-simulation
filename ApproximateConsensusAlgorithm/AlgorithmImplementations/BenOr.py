@@ -65,11 +65,10 @@ class AlgorithmBenOr:
                 AlgorithmBenOr.logger.info(
                     f"Server {self.server_id} processing future p={message['p']} "
                     f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
-                if message['phase'] == 1:
-                    self.R[message['id']] = message['v']
-                else:
-                    self.R[message['id']] = message['v']
-                    self.S[message['id']] = message['w']
+
+                self.R[message['id']] = message['v']
+                self.S[message['id']] = message['w']
+
 
         if message['p'] > self.p:
             AlgorithmBenOr.logger.info(
