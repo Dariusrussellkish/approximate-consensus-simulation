@@ -181,7 +181,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         except socket.timeout:
             continue
         for r_socket in rtr:
-            data, ip = r_socket.recvfrom(1024)
+            data = r_socket.recv(1024)
+            ip = r_socket.getpeername()
             logging.info(f"Server {server_id} received from {ip}: {data.decode('utf-8').strip()}")
             if not data:
                 continue
