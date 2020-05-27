@@ -235,7 +235,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
             if message['updated'] and state['is_down']:
                 logging.info(f"Server {serverID} honoring update from {message['id']} but is down")
-                continue
 
             updated = algorithm.process_message(message)
 
