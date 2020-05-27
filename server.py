@@ -180,13 +180,16 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         except socket.timeout:
             continue
         for r_socket in rtr:
-            final_data = b''
-            while len(final_data) < 1024:
-                data = r_socket.recv(1024-len(final_data))
-                if not data:
-                    break
-                final_data = final_data + data
-            if not final_data:
+            try:
+                final_data = b''
+                while len(final_data) < 1024:
+                    data = r_socket.recv(1024-len(final_data))
+                    if not data:
+                        break
+                    final_data = final_data + data
+                if not final_data:
+                    continue
+            except ConnectionResetError:
                 continue
             try:
                 message = json.loads(final_data.decode('utf-8'))
