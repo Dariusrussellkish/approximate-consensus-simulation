@@ -86,8 +86,8 @@ class AlgorithmBenOr:
 
         # AlgorithmBenOr.logger.info(
         #     f"Server {self.server_id} p={self.p} phase {self.phase}, R: {self.R}")
-        AlgorithmBenOr.logger.info(
-            f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
+        # AlgorithmBenOr.logger.info(
+        #     f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
         should_update = False

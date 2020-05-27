@@ -148,7 +148,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                 else:
                     s.sendall(message)
             except socket.timeout:
-                logger.exception(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
+                logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
                 retry_sockets[s] = True
             except IOError:
                 pass
@@ -166,7 +166,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     else:
                         s.sendall(message)
                 except socket.timeout:
-                    logger.exception(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
+                    logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                     retry_sockets[s] = True
                 except IOError:
                     pass
