@@ -199,7 +199,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            # logger.debug(f"Server {server_id} received message from {message['id']}")
+            broadcast_tcp(algorithm, server_state, server_id, sockets)
+
             updated = algorithm.process_message(message)
 
             if updated:
