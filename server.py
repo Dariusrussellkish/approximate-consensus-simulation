@@ -170,6 +170,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                     retry_sockets[s] = True
                 except IOError:
+                    retry_sockets[s] = True
                     pass
         # logger.info(f"Server {server_id} is done with broadcast")
 
