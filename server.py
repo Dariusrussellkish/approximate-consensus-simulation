@@ -174,13 +174,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     signaled_controller = False
 
     last_updated_counter = 0
-    while not server_state.is_finished():
-        if last_updated_counter == 0:
-            broadcast_tcp(algorithm, server_state, server_id, sockets)
-            last_updated_counter += 1
-        elif last_updated_counter > params['servers'] - params['f'] - 2:
-            last_updated_counter = 0
 
+    while not server_state.is_finished():
         try:
             rtr, _, _ = select.select(list(sockets.values()), [], [], 5)
         except socket.timeout:
@@ -207,6 +202,12 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
             if message["id"] == server_id:
                 continue
+
+            if last_updated_counter == 0:
+                broadcast_tcp(algorithm, server_state, server_id, sockets)
+                last_updated_counter += 1
+            elif last_updated_counter > params['servers'] - params['f'] - 2:
+                last_updated_counter = 0
 
             # logger.debug(f"Server {server_id} received message from {message['id']}")
             updated = algorithm.process_message(message)
