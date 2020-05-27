@@ -58,9 +58,7 @@ class AlgorithmBenOr:
         s_id = message['id']
 
         if self.futures[self.p]:
-            futures_len = len(self.futures[self.p])
-            for i in range(futures_len):
-                message = self.futures[self.p].pop(0)
+            for message in self.futures.values():
                 AlgorithmBenOr.logger.info(
                     f"Server {self.server_id} processing future p={message['p']} "
                     f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
@@ -69,6 +67,7 @@ class AlgorithmBenOr:
                 else:
                     self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
+            self.futures[self.p] = {}
 
         if message['p'] > self.p and not message['id'] in self.futures[message['p']]:
             AlgorithmBenOr.logger.info(
