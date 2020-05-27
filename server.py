@@ -200,6 +200,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
+    messages = {s: b'' for s in sockets.values()}
     while not server_state.is_finished():
         broadcast_tcp(algorithm, server_state, server_id, sockets)
         state = server_state.get_state()
@@ -207,11 +208,13 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         for r_socket in rtr:
             try:
                 final_data = b''
-                while len(final_data) < 1024:
-                    data = r_socket.recv(1024-len(final_data))
-                    if not data:
-                        break
-                    final_data = final_data + data
+                data = r_socket.recv(1024-len(final_data))
+                if not data:
+                    continue
+                messages[r_socket] += data
+                if len(messages[r_socket]) == 1024:
+                    final_data = messages[r_socket]
+                    messages[r_socket] = b''
                 if not final_data:
                     continue
             except ConnectionResetError:
