@@ -99,5 +99,6 @@ class AlgorithmJACM86:
         return {
             "v": self.v,
             "p": self.p,
+            "phase": self.phase,
             "algorithm_is_done": self.is_done()
         }
