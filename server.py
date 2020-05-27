@@ -146,6 +146,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                         logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 else:
+                    logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                     s.sendall(message)
             except socket.timeout:
                 # logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
@@ -163,6 +164,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                             logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                             s.sendall(message)
                     else:
+                        logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 except socket.timeout:
                     # logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
