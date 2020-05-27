@@ -134,7 +134,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     global params
     state = server_state.get_state()
     algo_state = algorithm.get_internal_state()
-    message = format_message({**state, **algo_state})
+    message = format_message({**state, **algo_state, 'updated': updated})
     retry_sockets = {}
     if not state['is_down'] or updated:
         # logger.info(f"Server {server_id} is beginning broadcast")
@@ -229,7 +229,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            if algorithm.algorithm.p >= message['p'] and state['is_down']:
+            if not message['updated'] and state['is_down']:
                 # logging.info(f"Server {serverID} received from {message['id']} but is down, skipping")
                 continue
 
