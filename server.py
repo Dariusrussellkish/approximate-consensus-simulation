@@ -140,7 +140,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     if not state['is_down'] or updated:
         for s in s_sockets.values():
             try:
-                s.settimeout(0.1)
+                s.settimeout(0.02)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
                         # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
@@ -148,7 +148,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                 else:
                     s.sendall(message)
             except socket.timeout:
-                logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
+                # logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
                 retry_sockets[s] = True
             except IOError:
                 pass
@@ -157,7 +157,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
             for s in retry_sockets_list:
                 retry_sockets.pop(s)
                 try:
-                    s.settimeout(0.1)
+                    s.settimeout(0.02)
                     if algorithm.supports_byzantine() and state['is_byzantine']:
                         if random.rand() > params["byzantine_send_p"]:
                             # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
@@ -165,7 +165,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     else:
                         s.sendall(message)
                 except socket.timeout:
-                    logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
+                    # logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                     retry_sockets[s] = True
                 except IOError:
                     pass
