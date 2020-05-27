@@ -189,10 +189,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 received_data_amounts[ip] += data
                 continue
             try:
+                message = json.loads(received_data_amounts[ip].decode('utf-8'))
                 received_data_amounts[ip] = []
-                message = json.loads(data.decode('utf-8'))
             except json.decoder.JSONDecodeError:
-                logging.exception(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8').strip()}")
+                logging.exception(f"Server {server_id} encountered error parsing "
+                                  f"JSON: {received_data_amounts[ip].decode('utf-8').strip()}")
                 raise json.decoder.JSONDecodeError
 
             if message["id"] == server_id:
