@@ -137,7 +137,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     message = format_message({**state, **algo_state})
     retry_sockets = {}
     if not state['is_down'] or updated:
-        logger.info(f"Server {server_id} is beginning broadcast")
+        # logger.info(f"Server {server_id} is beginning broadcast")
         for s in s_sockets.values():
             try:
                 s.settimeout(0.02)
@@ -146,7 +146,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                         logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 else:
-                    logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                    # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                     s.sendall(message)
             except socket.timeout:
                 # logger.info(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
@@ -164,14 +164,14 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                             logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                             s.sendall(message)
                     else:
-                        logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                        # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 except socket.timeout:
-                    # logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
+                    logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                     retry_sockets[s] = True
                 except IOError:
                     pass
-        logger.info(f"Server {server_id} is done with broadcast")
+        # logger.info(f"Server {server_id} is done with broadcast")
 
 
 def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
