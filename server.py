@@ -186,13 +186,12 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 data = r_socket.recv(1024-len(final_data))
                 if not data:
                     break
-                logging.info(f"Server {server_id} received chunk from {ip}, now is: "
-                             f"{final_data.decode('utf-8').strip()}")
                 final_data = final_data + data
             if not final_data:
                 continue
             try:
                 message = json.loads(final_data.decode('utf-8'))
+                logging.info(f"Server {server_id} received message from {message['id']}: {message}")
             except json.decoder.JSONDecodeError:
                 logging.exception(f"Server {server_id} encountered error parsing "
                                   f"JSON: {final_data.decode('utf-8').strip()}")
