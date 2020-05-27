@@ -84,6 +84,7 @@ class AlgorithmBenOr:
 
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
+        should_update = False
         if self.phase == 1 and len(filtered_R) >= self.nServers - self.f:
             majority_value = __check_majority__(self.R)
             if majority_value is not None:
@@ -92,6 +93,7 @@ class AlgorithmBenOr:
             else:
                 self.w = -1
                 self.S[self.p] = -1
+            should_update = True
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} moving to phase 2, phase is {self.p}")
             self.phase = 2
@@ -109,7 +111,7 @@ class AlgorithmBenOr:
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} accepted update, phase is now {self.p}")
             return True
-        return False
+        return should_update
 
     def get_internal_state(self):
         return {
