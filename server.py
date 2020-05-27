@@ -140,7 +140,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
         # logger.info(f"Server {server_id} is beginning broadcast")
         for s in s_sockets.values():
             try:
-                s.settimeout(0.02)
+                s.settimeout(0.5)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
                         logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
@@ -158,7 +158,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
             for s in retry_sockets_list:
                 retry_sockets.pop(s)
                 try:
-                    s.settimeout(0.02)
+                    s.settimeout(0.5)
                     if algorithm.supports_byzantine() and state['is_byzantine']:
                         if random.rand() > params["byzantine_send_p"]:
                             logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
