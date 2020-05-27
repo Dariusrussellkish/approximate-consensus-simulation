@@ -184,11 +184,13 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             while len(final_data) < 1024:
                 ip = r_socket.getpeername()[0]
                 data = r_socket.recv(1024-len(final_data))
+                if not data:
+                    break
                 logging.info(f"Server {server_id} received chunk from {ip}, now is: "
                              f"{final_data.decode('utf-8').strip()}")
-                if not data:
-                    continue
                 final_data = final_data + data
+            if not final_data:
+                continue
             try:
                 message = json.loads(final_data.decode('utf-8'))
             except json.decoder.JSONDecodeError:
