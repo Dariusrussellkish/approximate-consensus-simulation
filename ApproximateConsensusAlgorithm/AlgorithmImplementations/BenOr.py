@@ -59,7 +59,8 @@ class AlgorithmBenOr:
         s_id = message['id']
 
         if self.futures[self.p]:
-            for i in range(len(self.futures[self.p])):
+            futures_len = len(self.futures[self.p])
+            for i in range(futures_len):
                 message = self.futures[self.p].pop(0)
                 if message['phase'] == 1:
                     self.R[message['id']] = message['v']
