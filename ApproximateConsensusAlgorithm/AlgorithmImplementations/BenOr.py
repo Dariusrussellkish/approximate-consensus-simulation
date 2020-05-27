@@ -95,10 +95,10 @@ class AlgorithmBenOr:
             majority_value = __check_majority__(self.R)
             if majority_value is not None:
                 self.w = majority_value
-                self.S[self.p] = majority_value
+                self.S[self.server_id] = majority_value
             else:
                 self.w = -1
-                self.S[self.p] = -1
+                self.S[self.server_id] = -1
             should_update = True
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} moving to phase 2, phase is {self.p}")
