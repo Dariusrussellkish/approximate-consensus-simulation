@@ -62,22 +62,26 @@ class AlgorithmBenOr:
             futures_len = len(self.futures[self.p])
             for i in range(futures_len):
                 message = self.futures[self.p].pop(0)
+                AlgorithmBenOr.logger.info(
+                    f"Server {self.server_id} processing future p={message['p']} "
+                    f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
                 if message['phase'] == 1:
                     self.R[message['id']] = message['v']
-                    self.S[message['id']] = message['w']
                 else:
                     self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
 
         if message['p'] > self.p:
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} received future p={message['p']} phase {message['phase']} from {s_id}")
             self.futures[message['p']].append(message)
         if message['p'] == self.p and message['phase'] == 1:
-            AlgorithmBenOr.logger.info(
-                f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
+            # AlgorithmBenOr.logger.info(
+            #     f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
             self.R[s_id] = message['v']
         elif message['p'] == self.p and message['phase'] == 2:
-            AlgorithmBenOr.logger.info(
-                f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
+            # AlgorithmBenOr.logger.info(
+            #     f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
             self.S[s_id] = message['w']
 
         filtered_R = __filter_list__(self.R)
