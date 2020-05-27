@@ -56,7 +56,7 @@ class AlgorithmBenOr:
 
     def process_message(self, message):
         s_id = message['id']
-
+        should_update = False
         if self.futures[self.p]:
             for message in self.futures[self.p].values():
                 # AlgorithmBenOr.logger.info(
@@ -64,10 +64,9 @@ class AlgorithmBenOr:
                 AlgorithmBenOr.logger.info(
                     f"Server {self.server_id} processing future p={message['p']} "
                     f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
-                if message['phase'] == 1:
+                if message['phase'] == 1 and self.R[message['id']] is None:
                     self.R[message['id']] = message['v']
-                    self.S[message['id']] = message['w']
-                else:
+                elif self.S[message['id']] is None:
                     self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
             self.futures[self.p] = {}
@@ -92,7 +91,6 @@ class AlgorithmBenOr:
         #     f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
-        should_update = False
         if self.phase == 1 and len(filtered_R) >= self.nServers - self.f:
             majority_value = __check_majority__(self.R)
             if majority_value is not None:
