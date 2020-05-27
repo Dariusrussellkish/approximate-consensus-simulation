@@ -135,15 +135,15 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     state = server_state.get_state()
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
-    # logger.info(f"Server {server_id} is beginning broadcast")
     retry_sockets = {}
     if not state['is_down'] or updated:
+        logger.info(f"Server {server_id} is beginning broadcast")
         for s in s_sockets.values():
             try:
                 s.settimeout(0.02)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
-                        # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                        logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 else:
                     s.sendall(message)
@@ -160,7 +160,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     s.settimeout(0.02)
                     if algorithm.supports_byzantine() and state['is_byzantine']:
                         if random.rand() > params["byzantine_send_p"]:
-                            # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
+                            logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                             s.sendall(message)
                     else:
                         s.sendall(message)
@@ -169,7 +169,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     retry_sockets[s] = True
                 except IOError:
                     pass
-    # logger.info(f"Server {server_id} is done with broadcast")
+        logger.info(f"Server {server_id} is done with broadcast")
 
 
 def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):

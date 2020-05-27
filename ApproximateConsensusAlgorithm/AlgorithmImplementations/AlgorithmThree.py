@@ -39,7 +39,7 @@ class AlgorithmThree:
         self.eps = eps
         self._reset()
         self.supports_byzantine = servers > 5 * f
-        self.a = 0.5 * ((servers - 5 * f) / (2 * (servers - f)))
+        self.a = 1 - (1.0 / (2**servers))
         self.p_end = log(eps / K) / log(self.a)
         AlgorithmThree.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
