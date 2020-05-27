@@ -173,11 +173,13 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
-    has_updated_this_phase = False
+    last_updated_counter = 0
     while not server_state.is_finished():
-        if not has_updated_this_phase:
+        if last_updated_counter == 0:
             broadcast_tcp(algorithm, server_state, server_id, sockets)
-            has_updated_this_phase = True
+            last_updated_counter += 1
+        elif last_updated_counter > params['servers'] - params['f'] - 2:
+            last_updated_counter = 0
 
         try:
             rtr, _, _ = select.select(list(sockets.values()), [], [], 5)
