@@ -40,7 +40,7 @@ class AlgorithmBenOr:
         self.supports_byzantine = False
         self.has_valid_n = servers > 2 * f
         self.eps = eps
-        self.futures = defaultdict(list)
+        self.futures = defaultdict(dict)
         self._reset()
         self.requires_synchronous_update_broadcast = True
         self.isDone = False
@@ -71,7 +71,7 @@ class AlgorithmBenOr:
         if message['p'] > self.p:
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} received future p={message['p']} phase {message['phase']} from {s_id}")
-            self.futures[message['p']].append(message)
+            self.futures[message['p']][message['id']] = message
         if message['p'] == self.p and self.R[s_id] is None and message['phase'] == 1:
             # AlgorithmBenOr.logger.info(
             #     f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
