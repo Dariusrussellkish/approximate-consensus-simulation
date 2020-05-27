@@ -227,7 +227,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            if algorithm.algorthm.p >= message['p'] and state['is_down']:
+            if algorithm.algorithm.p >= message['p'] and state['is_down']:
                 continue
 
             updated = algorithm.process_message(message)
