@@ -130,14 +130,14 @@ def broadcast(algorithm, server_state, server_id, bcastSocket):
         bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
 
 
-def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
+def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     global params
     state = server_state.get_state()
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
     # logger.info(f"Server {server_id} is beginning broadcast")
     retry_sockets = {}
-    if not state['is_down']:
+    if not state['is_down'] or updated:
         for s in s_sockets.values():
             try:
                 s.settimeout(0.1)
@@ -232,7 +232,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if updated:
                 algo_state = algorithm.get_internal_state()
                 state = server_state.get_state()
-                broadcast_tcp(algorithm, server_state, server_id, sockets)
+                broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
                 message = format_message({**state, **algo_state})
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controller_connection.send_state(message)
