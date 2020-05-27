@@ -136,11 +136,11 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
     logger.info(f"Server {server_id} is beginning broadcast")
-    retry_sockets = []
+    retry_sockets = {}
     if not state['is_down']:
-        retry_sockets_length = len(retry_sockets)
-        for i in range(retry_sockets_length):
-            s = retry_sockets.pop()
+        retry_sockets = list(retry_sockets.keys())
+        for s in retry_sockets:
+            s = retry_sockets.pop(s)
             try:
                 s.settimeout(0.1)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
@@ -151,6 +151,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
                     s.sendall(message)
             except socket.timeout:
                 logger.exception(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
+                retry_sockets[s] = True
             except IOError:
                 pass
         for s in s_sockets.values():
@@ -164,6 +165,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
                     s.sendall(message)
             except socket.timeout:
                 logger.exception(f"Server {server_id} timed out sending to {s.getpeername()}, adding it to retry")
+                retry_sockets[s] = True
             except IOError:
                 pass
     logger.info(f"Server {server_id} is done with broadcast")
