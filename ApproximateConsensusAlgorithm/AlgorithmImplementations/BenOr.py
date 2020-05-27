@@ -62,9 +62,9 @@ class AlgorithmBenOr:
             for i in range(len(self.futures[self.p])):
                 message = self.futures[self.p].pop()
                 if message['phase'] == 1:
-                    self.R[s_id] = message['v']
+                    self.R[message['id']] = message['v']
                 else:
-                    self.S[s_id] = message['w']
+                    self.S[message['id']] = message['w']
 
         if message['p'] > self.p:
             self.futures[message['p']].append(message)
