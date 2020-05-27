@@ -80,8 +80,8 @@ class AlgorithmJACM86:
             #                             f"received from {s_id} in phase {message['']}")
             self.R[message['p']][s_id] = message['v']
 
-        AlgorithmJACM86.logger.info(f"Server {self.server_id} "
-                                    f"R[{self.p}] is {['p' if x else 'N' for x in self.R[self.p]]}")
+        # AlgorithmJACM86.logger.info(f"Server {self.server_id} "
+        #                             f"R[{self.p}] is {['p' if x else 'N' for x in self.R[self.p]]}")
         filtered_R = __filter_list__(self.R[self.p])
         if len(filtered_R) >= self.nServers - self.f:
             if self.p <= self.p_end:
