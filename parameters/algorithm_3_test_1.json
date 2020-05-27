@@ -17,5 +17,6 @@
   "server_ips": [
     "localhost"
   ],
-  "drop_rate": 0.1
+  "drop_rate": 0.1,
+  "terminate_on_p_agreement": true
 }

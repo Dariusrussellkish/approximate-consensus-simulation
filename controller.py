@@ -70,9 +70,9 @@ def get_wait_time(isDown, shape=3, scale=2):
     if wait > 10:
         wait = 10
     if isDown:
-        wait = interp(wait, (0, 10), (0, 2))
+        wait = interp(wait, (0, 10), (0, 1))
     else:
-        wait = interp(wait, (0, 10), (0, 2))
+        wait = interp(wait, (0, 10), (0, 20))
     return wait
 
 
@@ -196,6 +196,24 @@ def process_server_states():
         received_time = int(round(time.time() * 1000))
         serverStates[message["id"]].append({**message, 'time_received': received_time})
 
+        if not 'p_agreement' in serverStates:
+            min_v = params['K']
+            max_v = 0
+            for server in serverStates:
+                value = serverStates[server][-1]['v']
+                if value < min_v:
+                    min_v = value
+                if value > max_v:
+                    max_v = value
+
+                if max_v - min_v <= params['eps']:
+                    serverStates['p_agreement'] = serverStates[server][-1]
+                    logging.info(f"Controller saw p agreement")
+                    if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
+                        logging.info(f"Controller is terminating servers by p agreement")
+                        for dserver in doneServers:
+                            doneServers[dserver] = True
+
         doneServersLock.acquire()
         try:
             if message["is_done"]:
@@ -236,15 +254,13 @@ if __name__ == "__main__":
         # pick which servers will be down
         servers = params["server_ips"]
         downedServers = random.choice(servers, params["f"], replace=False)
-        logging.info(f"Downed servers are: {downedServers}")
-        notDownedServers = list(set(servers) - set(downedServers))
-        logging.info(f"Servers eligible for Byzantine are: {notDownedServers}")
         if algorithm.supports_byzantine():
-            byzantineServers = random.choice(notDownedServers,
-                                             random.randint(0, len(notDownedServers) + 1), replace=False)
+            logging.info(f"Byzantine servers are: {downedServers}")
+            byzantineServers = downedServers
+            downedServers = []
         else:
+            logging.info(f"Permanently Downed servers are: {downedServers}")
             byzantineServers = []
-        logging.info(f"Byzantine Servers are: {byzantineServers}")
 
         sockets = {}
 
