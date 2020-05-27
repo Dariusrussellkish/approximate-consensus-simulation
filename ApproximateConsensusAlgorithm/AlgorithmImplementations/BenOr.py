@@ -103,9 +103,9 @@ class AlgorithmBenOr:
                 self.v = __flip_coin__()
             self.phase = 1
             self._reset()
+            self.p += 1
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} accepted update, phase is now {self.p}")
-            self.p += 1
             return True
         return False
 
