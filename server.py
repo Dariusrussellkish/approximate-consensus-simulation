@@ -246,7 +246,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                     message = format_message({**state, **algo_state})
                     controller_connection.send_state(message)
                     signaled_controller = True
-        broadcast_tcp(algorithm, server_state, server_id, sockets)
 
 
 def process_message(algorithm, server_state, controller_connection, server_id, bcastsocket):
