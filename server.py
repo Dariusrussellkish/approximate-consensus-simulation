@@ -169,9 +169,11 @@ def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
 
 
 def process_messages_tcp(algorithm, server_state, controller_connection, server_id, sockets):
+    global params
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
+    received_data_amounts = {ip: [] for ip in params['server_ips']}
     while not server_state.is_finished():
         broadcast_tcp(algorithm, server_state, server_id, sockets)
         try:
@@ -179,10 +181,14 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         except socket.timeout:
             continue
         for r_socket in rtr:
-            data = r_socket.recv(1024)
+            data, ip = r_socket.recvfrom(1024)
             if not data:
                 continue
+            if len(received_data_amounts[ip]) < 1024:
+                received_data_amounts[ip] += data
+                continue
             try:
+                received_data_amounts[ip] = []
                 message = json.loads(data.decode('utf-8'))
             except json.decoder.JSONDecodeError:
                 logging.error(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8').strip()}")
