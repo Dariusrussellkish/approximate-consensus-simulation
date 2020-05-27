@@ -182,7 +182,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         for r_socket in rtr:
             final_data = b''
             while len(final_data) < 1024:
-                ip = r_socket.getpeername()[0]
                 data = r_socket.recv(1024-len(final_data))
                 if not data:
                     break
