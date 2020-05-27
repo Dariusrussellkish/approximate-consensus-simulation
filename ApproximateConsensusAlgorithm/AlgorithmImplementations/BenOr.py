@@ -60,7 +60,7 @@ class AlgorithmBenOr:
 
         if self.futures[self.p]:
             for i in range(len(self.futures[self.p])):
-                message = self.futures[self.p].pop()
+                message = self.futures[self.p].pop(0)
                 if message['phase'] == 1:
                     self.R[message['id']] = message['v']
                 else:
