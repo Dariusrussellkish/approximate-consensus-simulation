@@ -183,7 +183,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         for r_socket in rtr:
             ip = r_socket.getpeername()[0]
             data = r_socket.recv(1024-len(received_data_amounts[ip]))
-            if not data or not data.decode('utf-8').strip():
+            if not data:
                 continue
             if len(received_data_amounts[ip]) < 1024:
                 received_data_amounts[ip] += data
