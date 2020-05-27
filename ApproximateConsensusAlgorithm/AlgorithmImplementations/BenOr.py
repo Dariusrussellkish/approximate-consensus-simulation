@@ -78,6 +78,7 @@ class AlgorithmBenOr:
             self.S[s_id] = message['w']
 
         filtered_R = __filter_list__(self.R)
+        filtered_S = __filter_list__(self.S)
         if self.phase == 1 and len(filtered_R) >= self.nServers - self.f:
             majority_value = __check_majority__(self.R)
             if majority_value is not None:
@@ -87,9 +88,7 @@ class AlgorithmBenOr:
                 self.w = -1
                 self.S[self.p] = -1
             self.phase = 2
-            return True
-        filtered_S = __filter_list__(self.S)
-        if self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
+        elif self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
             values = __filter_list__(self.S, remove=[None, -1])
             if values:
                 self.v = values[0]
