@@ -180,7 +180,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             continue
         for r_socket in rtr:
             data = r_socket.recv(1024)
-            if not data or not data.decode('utf-8').strip():
+            if not data:
                 continue
             try:
                 message = json.loads(data.decode('utf-8'))
@@ -226,7 +226,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         try:
             bcastListenSocket.settimeout(0.5)
             data, addr = bcastListenSocket.recvfrom(1024)
-            if not data or not data.decode('utf-8').strip():
+            if not data:
                 continue
             try:
                 message = json.loads(data.decode('utf-8'))
