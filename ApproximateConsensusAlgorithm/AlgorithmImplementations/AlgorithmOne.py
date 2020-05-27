@@ -37,7 +37,7 @@ class AlgorithmOne:
             if sum(self.R) >= self.nServers - self.f:
                 self.v = (max(self.R) + min(self.R)) / 2.0
                 self.p += 1
-                self.R[self.p] = self.v
+                self._reset()
                 return True
         return False
 
