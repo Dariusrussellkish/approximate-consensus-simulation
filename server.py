@@ -138,9 +138,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
     logger.info(f"Server {server_id} is beginning broadcast")
     retry_sockets = {}
     if not state['is_down']:
-        retry_sockets = list(retry_sockets.keys())
-        for s in retry_sockets:
-            s = retry_sockets.pop(s)
+        for s in s_sockets.values():
             try:
                 s.settimeout(0.1)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
@@ -154,7 +152,10 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
                 retry_sockets[s] = True
             except IOError:
                 pass
-        for s in s_sockets.values():
+
+        retry_sockets_list = list(retry_sockets.keys())
+        for s in retry_sockets_list:
+            s = retry_sockets.pop(s)
             try:
                 s.settimeout(0.1)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
