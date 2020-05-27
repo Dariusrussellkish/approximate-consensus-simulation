@@ -199,7 +199,8 @@ def process_server_states():
         if not 'p_agreement' in serverStates:
             min_v = params['K']
             max_v = 0
-            for server in serverStates:
+            servers_to_check = list(serverStates.keys())
+            for server in servers_to_check:
                 value = serverStates[server][-1]['v']
                 if value < min_v:
                     min_v = value
