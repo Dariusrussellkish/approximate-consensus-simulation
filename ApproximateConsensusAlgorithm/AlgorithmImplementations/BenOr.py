@@ -70,7 +70,7 @@ class AlgorithmBenOr:
                     self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
 
-        if message['p'] > self.p:
+        if message['p'] > self.p and not message['id'] in self.futures[message['p']]:
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} received future p={message['p']} phase {message['phase']} from {s_id}")
             self.futures[message['p']][message['id']] = message
