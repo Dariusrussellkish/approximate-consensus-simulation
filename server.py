@@ -183,7 +183,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         for r_socket in rtr:
             data = r_socket.recv(1024)
             ip = r_socket.getpeername()[0]
-            logging.info(f"Server {server_id} received from {ip}: {data.decode('utf-8').strip()}")
             if not data:
                 continue
             if len(received_data_amounts[ip]) < 1024:
@@ -193,8 +192,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 received_data_amounts[ip] = []
                 message = json.loads(data.decode('utf-8'))
             except json.decoder.JSONDecodeError:
-                logging.error(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8').strip()}")
-                continue
+                logging.exception(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8').strip()}")
+                raise json.decoder.JSONDecodeError
 
             if message["id"] == server_id:
                 continue
