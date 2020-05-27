@@ -81,6 +81,10 @@ class AlgorithmBenOr:
             #     f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
             self.S[s_id] = message['w']
 
+        AlgorithmBenOr.logger.info(
+            f"Server {self.server_id} p={message['p']} phase 1, R: {self.R}")
+        AlgorithmBenOr.logger.info(
+            f"Server {self.server_id} p={message['p']} phase 1, S: {self.S} ")
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
         should_update = False
@@ -116,6 +120,6 @@ class AlgorithmBenOr:
         return {
             "phase": self.phase,
             "v": self.v,
-            "p": int(self.p),
+            "p": self.p,
             "w": self.w
         }
