@@ -223,7 +223,9 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            broadcast_tcp(algorithm, server_state, server_id, sockets)
+            state = server_state.get_state()
+            if state['is_down']:
+                continue
 
             updated = algorithm.process_message(message)
 
@@ -278,6 +280,10 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
             continue
 
         logger.debug(f"Server {server_id} received message from {message['id']}")
+
+        state = server_state.get_state()
+        if state['is_down']:
+            continue
 
         updated = algorithm.process_message(message)
 

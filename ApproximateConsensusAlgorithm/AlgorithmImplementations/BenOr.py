@@ -64,9 +64,10 @@ class AlgorithmBenOr:
                 AlgorithmBenOr.logger.info(
                     f"Server {self.server_id} processing future p={message['p']} "
                     f"phase {message['phase']} from {message['id']}, v={message['v']}, w={message['w']}")
-
-                self.R[message['id']] = message['v']
-                self.S[message['id']] = message['w']
+                if message['phase'] == 1:
+                    self.R[message['id']] = message['v']
+                else:
+                    self.S[message['id']] = message['w']
 
         if message['p'] > self.p:
             AlgorithmBenOr.logger.info(
@@ -82,9 +83,9 @@ class AlgorithmBenOr:
             self.S[s_id] = message['w']
 
         AlgorithmBenOr.logger.info(
-            f"Server {self.server_id} p={message['p']} phase {self.phase}, R: {self.R}")
+            f"Server {self.server_id} p={self.p} phase {self.phase}, R: {self.R}")
         AlgorithmBenOr.logger.info(
-            f"Server {self.server_id} p={message['p']} phase {self.phase}, S: {self.S}")
+            f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
         should_update = False
