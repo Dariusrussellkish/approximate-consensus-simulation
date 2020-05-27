@@ -165,7 +165,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
                     # logger.info(f"Server {server_id} is broadcasting to {s.getpeername()}")
                     s.sendall(message)
             except socket.timeout:
-                # logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
+                logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                 retry_sockets[s] = True
             except IOError:
                 pass
@@ -198,7 +198,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
 
     messages = {s: b'' for s in sockets.values()}
     message_queue = []
-    time.sleep(1)
     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
         state = server_state.get_state()
