@@ -52,6 +52,7 @@ class AlgorithmJACM86:
         self.done_values = [None for _ in range(servers)]
         self.supports_byzantine = servers > 5 * f
         self.p_end = log(eps / K) / log(0.5)
+        self.phase = 1
         self._set()
         self.requires_synchronous_update_broadcast = True
         AlgorithmJACM86.logger.info(
