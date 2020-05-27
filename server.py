@@ -139,12 +139,15 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
     if not state['is_down']:
         for s in s_sockets.values():
             try:
+                s.settimeout(5)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
                     if random.rand() > params["byzantine_send_p"]:
                         # logger.debug(f"Server {server_id} is broadcasting to {s.getpeername()}")
                         s.sendall(message)
                 else:
                     s.sendall(message)
+            except socket.timeout:
+                logger.exception(f"Server {server_id} timed out sending to {s.getpeername()}")
             except IOError:
                 pass
     logger.info(f"Server {server_id} is done with broadcast")
