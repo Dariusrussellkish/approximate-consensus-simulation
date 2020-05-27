@@ -155,7 +155,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
 
         retry_sockets_list = list(retry_sockets.keys())
         for s in retry_sockets_list:
-            s = retry_sockets.pop(s)
+            retry_sockets.pop(s)
             try:
                 s.settimeout(0.1)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
