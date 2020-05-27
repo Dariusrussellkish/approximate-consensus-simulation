@@ -202,6 +202,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     message_queue = defaultdict(lambda: defaultdict(list))
     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
+        time.sleep(0.05)
         state = server_state.get_state()
         rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
         for r_socket in rtr:
