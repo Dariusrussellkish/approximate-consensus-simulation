@@ -76,19 +76,27 @@ class AlgorithmBenOr:
                 f"Server {self.server_id} received future p={message['p']} phase {message['phase']} from {s_id}")
             self.futures[message['p']][message['id']] = message
         if message['p'] == self.p and self.R[s_id] is None and message['phase'] == 1:
-            # AlgorithmBenOr.logger.info(
-            #     f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} received p={message['p']} phase 1 from {s_id}")
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} p={self.p} phase {self.phase}, R: {self.R}")
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
             self.R[s_id] = message['v']
         elif message['p'] == self.p and self.S[s_id] is None and message['phase'] == 2:
-            # AlgorithmBenOr.logger.info(
-            #     f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} p={self.p} phase {self.phase}, R: {self.R}")
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
             self.R[s_id] = message['v']
             self.S[s_id] = message['w']
 
-        AlgorithmBenOr.logger.info(
-            f"Server {self.server_id} p={self.p} phase {self.phase}, R: {self.R}")
-        AlgorithmBenOr.logger.info(
-            f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
+        # AlgorithmBenOr.logger.info(
+        #     f"Server {self.server_id} p={self.p} phase {self.phase}, R: {self.R}")
+        # AlgorithmBenOr.logger.info(
+        #     f"Server {self.server_id} p={self.p} phase {self.phase}, S: {self.S}")
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
         if self.phase == 1 and len(filtered_R) >= self.nServers - self.f:
