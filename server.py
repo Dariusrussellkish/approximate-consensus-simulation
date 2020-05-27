@@ -182,6 +182,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             continue
         for r_socket in rtr:
             data, ip = r_socket.recvfrom(1024)
+            logging.info(f"Server {server_id} received from {ip}: {data.decode('utf-8').strip()}")
             if not data:
                 continue
             if len(received_data_amounts[ip]) < 1024:
@@ -232,7 +233,6 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         try:
             bcastListenSocket.settimeout(0.5)
             data, addr = bcastListenSocket.recvfrom(1024)
-            logging.info(f"Server {server_id} received: {data.decode('utf-8').strip()}")
             if not data:
                 continue
             try:
