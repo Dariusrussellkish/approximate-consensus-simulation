@@ -1,5 +1,5 @@
 import logging
-from numpy import random, log
+from numpy import random, log, ceil
 
 
 class AlgorithmTwo:
@@ -34,6 +34,7 @@ class AlgorithmTwo:
         if p > self.p:
             self.v = v
             self.p = p
+            self._reset()
             return True
         elif p == self.p and self.R[s_id] == 0:
             self.R[s_id] = 1
