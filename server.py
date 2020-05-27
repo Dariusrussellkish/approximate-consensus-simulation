@@ -174,8 +174,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     signaled_controller = False
 
     last_updated_counter = 0
-
+    initial_broadcast = False
     while not server_state.is_finished():
+        if not initial_broadcast:
+            broadcast_tcp(algorithm, server_state, server_id, sockets)
+            initial_broadcast = True
         try:
             rtr, _, _ = select.select(list(sockets.values()), [], [], 5)
         except socket.timeout:
