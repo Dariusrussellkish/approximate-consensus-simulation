@@ -105,6 +105,8 @@ class AlgorithmBenOr:
             self.phase = 2
         if self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
             values = __filter_list__(self.S, remove=[None, -1])
+            AlgorithmBenOr.logger.info(
+                f"Server {self.server_id} accepting phase 2, values: {values}")
             if values:
                 self.v = values[0]
                 if len(list(x for x in self.S if x == self.v)) > self.f:

@@ -153,7 +153,6 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
             except IOError:
                 pass
         while len(retry_sockets.keys()) > 0:
-            time.sleep(0.5)
             retry_sockets_list = list(retry_sockets.keys())
             for s in retry_sockets_list:
                 retry_sockets.pop(s)
