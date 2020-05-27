@@ -200,10 +200,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     signaled_controller = False
 
     messages = {s: b'' for s in sockets.values()}
+    message_queue = []
+    broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
-        broadcast_tcp(algorithm, server_state, server_id, sockets)
         state = server_state.get_state()
-        rtr, _, _ = select.select(list(sockets.values()), [], [], 0.5)
+        rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
         for r_socket in rtr:
             try:
                 final_data = b''
@@ -229,22 +230,22 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            if not message['updated'] and state['is_down']:
-                # logging.info(f"Server {serverID} received from {message['id']} but is down, skipping")
-                continue
+            message_queue.append(message)
 
-            if message['updated'] and state['is_down']:
-                logging.info(f"Server {serverID} honoring update from {message['id']} but is down")
+            if not state['is_down'] and len(message_queue) > 0:
+                queue_length = len(message_queue)
+                for _ in range(queue_length):
+                    message = message_queue.pop(0)
 
-            updated = algorithm.process_message(message)
+                    updated = algorithm.process_message(message)
 
-            if updated:
-                algo_state = algorithm.get_internal_state()
-                state = server_state.get_state()
-                broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
-                message = format_message({**state, **algo_state})
-                logging.info(f"Server {serverID} is sending state update to controller")
-                controller_connection.send_state(message)
+                    if updated:
+                        algo_state = algorithm.get_internal_state()
+                        state = server_state.get_state()
+                        broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
+                        message = format_message({**state, **algo_state})
+                        logging.info(f"Server {serverID} is sending state update to controller")
+                        controller_connection.send_state(message)
 
             # let the controller know we are done
             if algorithm.is_done():
