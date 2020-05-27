@@ -58,7 +58,7 @@ class AlgorithmBenOr:
         s_id = message['id']
 
         if self.futures[self.p]:
-            for message in self.futures.values():
+            for message in self.futures[self.p].values():
                 AlgorithmBenOr.logger.info(
                     f"Server {self.server_id} processing future {message}")
                 # AlgorithmBenOr.logger.info(
