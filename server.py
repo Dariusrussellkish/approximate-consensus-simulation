@@ -198,10 +198,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     signaled_controller = False
 
     while not server_state.is_finished():
-        state = server_state.get_state()
-        if state['is_down']:
-            continue
         broadcast_tcp(algorithm, server_state, server_id, sockets)
+        state = server_state.get_state()
         rtr, _, _ = select.select(list(sockets.values()), [], [], 0.5)
         for r_socket in rtr:
             try:
@@ -224,6 +222,9 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 raise json.decoder.JSONDecodeError
 
             if message["id"] == server_id:
+                continue
+
+            if state['is_down']:
                 continue
 
             updated = algorithm.process_message(message)
