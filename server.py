@@ -173,7 +173,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
-    received_data_amounts = {ip: b'' for ip in params['server_ips']}
     while not server_state.is_finished():
         broadcast_tcp(algorithm, server_state, server_id, sockets)
         try:
@@ -181,21 +180,20 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         except socket.timeout:
             continue
         for r_socket in rtr:
-            ip = r_socket.getpeername()[0]
-            data = r_socket.recv(1024-len(received_data_amounts[ip]))
-            if not data:
-                continue
-            if len(received_data_amounts[ip]) < 1024:
-                logging.info(f"Server {server_id} received chunk, now is: "
-                             f"{received_data_amounts[ip].decode('utf-8').strip()}")
-                received_data_amounts[ip] = received_data_amounts[ip] + data
-                continue
+            final_data = b''
+            while len(final_data) < 1024:
+                ip = r_socket.getpeername()[0]
+                data = r_socket.recv(1024-len(final_data))
+                logging.info(f"Server {server_id} received chunk from {ip}, now is: "
+                             f"{final_data.decode('utf-8').strip()}")
+                if not data:
+                    continue
+                final_data = final_data + data
             try:
-                message = json.loads(received_data_amounts[ip].decode('utf-8'))
-                received_data_amounts[ip] = b''
+                message = json.loads(final_data.decode('utf-8'))
             except json.decoder.JSONDecodeError:
                 logging.exception(f"Server {server_id} encountered error parsing "
-                                  f"JSON: {received_data_amounts[ip].decode('utf-8').strip()}")
+                                  f"JSON: {final_data.decode('utf-8').strip()}")
                 raise json.decoder.JSONDecodeError
 
             if message["id"] == server_id:
