@@ -201,6 +201,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
         state = server_state.get_state()
+        broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
         rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
         for r_socket in rtr:
             try:
@@ -242,7 +243,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                         message = format_message({**state, **algo_state})
                         logging.info(f"Server {serverID} is sending state update to controller")
                         controller_connection.send_state(message)
-                    broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
 
             # let the controller know we are done
             if algorithm.is_done():
