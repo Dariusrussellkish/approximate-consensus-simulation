@@ -135,7 +135,7 @@ def unreliable_server(ip, server_id, byzantine, connection):
                 break
 
             isDown = not isDown
-            logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
+            # logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
             if byzantine and not isByzantine:
                 isByzantine = random.rand() < params["byzantine_p"]
                 message = format_message(True, isDown)

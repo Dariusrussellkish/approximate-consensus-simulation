@@ -35,8 +35,8 @@ class ServerState:
             self.is_done = message['is_done']
         finally:
             self.lock.release()
-            ServerState.logger.info(f"Server {self.server_id} received {self.is_down} {self.is_byzantine} "
-                                    f"{self.is_done} from controller")
+            # ServerState.logger.info(f"Server {self.server_id} received {self.is_down} {self.is_byzantine} "
+            #                         f"{self.is_done} from controller")
 
     def get_state(self):
         self.lock.acquire()
