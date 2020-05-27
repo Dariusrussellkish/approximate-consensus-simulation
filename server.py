@@ -135,7 +135,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
     state = server_state.get_state()
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
-    logger.info(f"Server {server_id} is beginning broadcast")
+    # logger.info(f"Server {server_id} is beginning broadcast")
     retry_sockets = {}
     if not state['is_down']:
         for s in s_sockets.values():
@@ -169,7 +169,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets):
                 retry_sockets[s] = True
             except IOError:
                 pass
-    logger.info(f"Server {server_id} is done with broadcast")
+    # logger.info(f"Server {server_id} is done with broadcast")
 
 
 def periodic_broadcast(algorithm, server_state, server_id, bcastSocket):
