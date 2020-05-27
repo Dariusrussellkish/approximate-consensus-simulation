@@ -67,6 +67,7 @@ class AlgorithmBenOr:
                 if message['phase'] == 1:
                     self.R[message['id']] = message['v']
                 else:
+                    self.R[message['id']] = message['v']
                     self.S[message['id']] = message['w']
 
         if message['p'] > self.p:
@@ -80,6 +81,7 @@ class AlgorithmBenOr:
         elif message['p'] == self.p and self.S[s_id] is None and message['phase'] == 2:
             # AlgorithmBenOr.logger.info(
             #     f"Server {self.server_id} received p={message['p']} phase 2 from {s_id}")
+            self.R[s_id] = message['v']
             self.S[s_id] = message['w']
 
         # AlgorithmBenOr.logger.info(
@@ -101,7 +103,7 @@ class AlgorithmBenOr:
             AlgorithmBenOr.logger.info(
                 f"Server {self.server_id} moving to phase 2, phase is {self.p}")
             self.phase = 2
-        elif self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
+        if self.phase == 2 and len(filtered_S) >= self.nServers - self.f:
             values = __filter_list__(self.S, remove=[None, -1])
             if values:
                 self.v = values[0]
