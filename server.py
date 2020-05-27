@@ -183,7 +183,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
         for r_socket in rtr:
             data = r_socket.recv(1024)
             ip = r_socket.getpeername()[0]
-            if not data:
+            if not data or not data.decode('utf-8').strip():
                 continue
             if len(received_data_amounts[ip]) < 1024:
                 received_data_amounts[ip] += data
@@ -233,7 +233,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         try:
             bcastListenSocket.settimeout(0.5)
             data, addr = bcastListenSocket.recvfrom(1024)
-            if not data:
+            if not data or not data.decode('utf-8').strip():
                 continue
             try:
                 message = json.loads(data.decode('utf-8'))
