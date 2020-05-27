@@ -186,6 +186,8 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if not data:
                 continue
             if len(received_data_amounts[ip]) < 1024:
+                logging.info(f"Server {server_id} received chunk, now is: "
+                             f"{received_data_amounts[ip].decode('utf-8').strip()}")
                 received_data_amounts[ip] += data
                 continue
             try:
