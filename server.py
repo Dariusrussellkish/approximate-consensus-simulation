@@ -173,15 +173,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
-    last_updated_counter = 0
-    initial_broadcast = False
     while not server_state.is_finished():
-        if not initial_broadcast:
-            broadcast_tcp(algorithm, server_state, server_id, sockets)
-            initial_broadcast = True
         try:
             rtr, _, _ = select.select(list(sockets.values()), [], [], 5)
         except socket.timeout:
+            broadcast_tcp(algorithm, server_state, server_id, sockets)
             continue
         for r_socket in rtr:
             try:
@@ -206,12 +202,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             if message["id"] == server_id:
                 continue
 
-            if last_updated_counter == 0:
-                broadcast_tcp(algorithm, server_state, server_id, sockets)
-                last_updated_counter += 1
-            elif last_updated_counter > params['servers'] - params['f'] - 2:
-                last_updated_counter = 0
-
+            broadcast_tcp(algorithm, server_state, server_id, sockets)
             # logger.debug(f"Server {server_id} received message from {message['id']}")
             updated = algorithm.process_message(message)
 
