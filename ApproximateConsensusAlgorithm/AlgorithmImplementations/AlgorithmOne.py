@@ -1,6 +1,5 @@
 import logging
-from typing import Union, List
-from numpy import random, log
+from numpy import random, log, ceil
 
 
 class AlgorithmOne:
@@ -34,10 +33,12 @@ class AlgorithmOne:
         s_id = message['id']
         if self.R[s_id] == 0:
             self.R[s_id] = message['v']
-            if sum(self.R) >= self.nServers - self.f:
+            if sum([ceil(x) for x in self.R]) >= self.nServers - self.f:
                 self.v = (max(self.R) + min(self.R)) / 2.0
                 self.p += 1
                 self._reset()
+                AlgorithmOne.logger.info(
+                    f"Server {self.server_id} accepting update, now phase {self.p}")
                 return True
         return False
 
