@@ -46,6 +46,8 @@ class AlgorithmTwo:
             values = __filter_list__(self.values)
             if len(values) >= self.nServers - self.f:
                 if any([abs(self.v - v) > self.eps/2. for v in values]):
+                    AlgorithmTwo.logger.info(
+                        f"Server {self.server_id} differences is {[abs(self.v - v) > self.eps/2. for v in values]}")
                     self.v = sum(values)
                     self.v = self.v / float(len(values))
                 else:
