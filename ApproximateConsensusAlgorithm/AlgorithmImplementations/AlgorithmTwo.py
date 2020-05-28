@@ -27,10 +27,8 @@ class AlgorithmTwo:
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
     def _reset(self):
-        self.R = list([0 for _ in range(self.nServers)])
         self.values = list([None for _ in range(self.nServers)])
         self.values[self.server_id] = self.v
-        self.R[self.server_id] = 1
 
     def is_done(self):
         return self.p > self.p_end
@@ -43,14 +41,13 @@ class AlgorithmTwo:
             self.v = v
             self.p = p
             self._reset()
-        elif p == self.p and self.R[s_id] == 0:
-            self.R[s_id] = 1
+        elif p == self.p and self.values[s_id] is None:
             self.values[s_id] = v
-            if sum(self.R) >= self.nServers - self.f:
-                values = __filter_list__(self.values)
+            values = __filter_list__(self.values)
+            if len(values) >= self.nServers - self.f:
                 if any([abs(self.v - v) > self.eps/2. for v in values]):
                     self.v = sum(values)
-                    self.v = self.v / float(sum(self.R))
+                    self.v = self.v / float(len(values))
                 else:
                     self.converged = True
                 self.p += 1
