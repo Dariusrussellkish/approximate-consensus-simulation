@@ -376,6 +376,7 @@ def connect_to_tcp_servers(sockets, server_id):
     for i in range(0, server_id):
         ip = params['server_ips'][i]
 
+        time.sleep(float(random.rand()))
         logging.info(f"Server {serverID} trying to connect with {ip}")
         broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         broadcast_tcp_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)

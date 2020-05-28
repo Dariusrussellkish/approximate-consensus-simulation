@@ -51,6 +51,7 @@ def start_simulation(params):
         unique = uuid.uuid4().hex
         os.system("mn --clean")
         net, hs = start_mini(params)
+        time.sleep(2)
         print(f"Starting simulation {k}")
         print(f"Starting logging server on ip: {hs[0].IP}")
         hs[0].cmd(f"python3 ~/approximate-consensus-simulation/logging_server.py "
@@ -61,6 +62,7 @@ def start_simulation(params):
                   f"{unique} {k} > logs/controller.out 2>&1 &")
 
         for i in range(params["servers"]):
+            time.sleep(0.5)
             print(f"Starting server {i} on ip: {hs[i+2].IP}")
             hs[i+2].cmd(f"python3 ~/approximate-consensus-simulation/server.py "
                         f"{sys.argv[1]} {i} > logs/server_{i}.out 2>&1 &")
