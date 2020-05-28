@@ -273,64 +273,52 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
 
     logger.info(f"Server {server_id} starting to process broadcast messages")
 
-    messages = {s: b'' for s in sockets.values()}
-    broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
     while not server_state.is_finished():
-        rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
-        for r_socket in rtr:
-            try:
-                final_data = b''
-                data = r_socket.recv(1024-len(messages[r_socket]))
-                if not data:
-                    continue
-                messages[r_socket] += data
-                if len(messages[r_socket]) == 1024:
-                    final_data = messages[r_socket]
-                    messages[r_socket] = b''
-                if not final_data:
-                    continue
-            except ConnectionResetError:
+        try:
+            bcastListenSocket.settimeout(0.5)
+            data, addr = bcastListenSocket.recvfrom(1024)
+            if not data or not data.decode('utf-8').strip():
                 continue
             try:
-                message = json.loads(final_data.decode('utf-8'))
-                # logging.info(f"Server {server_id} received message from {message['id']}: {message}")
+                message = json.loads(data.decode('utf-8'))
             except json.decoder.JSONDecodeError:
-                logging.exception(f"Server {server_id} encountered error parsing "
-                                  f"JSON: {final_data.decode('utf-8').strip()}")
-                raise json.decoder.JSONDecodeError
-
-            # if we pick up our own messages, don't listen
-            if message["id"] == server_id:
+                logging.error(f"Server {server_id} encountered error parsing JSON: {data.decode('utf-8').strip()}")
                 continue
+        except socket.timeout:
+            logger.debug(f"Server {server_id} timed out on BCAST read")
+            continue
+        # if we pick up our own messages, don't listen
+        if message["id"] == server_id:
+            continue
 
-            if random.rand() < params['drop_rate']:
-                logger.info(f"Server {server_id} is dropping packet from {message['id']}")
-                continue
+        if random.rand() < params['drop_rate']:
+            logger.info(f"Server {server_id} is dropping packet from {message['id']}")
+            continue
 
-            logger.debug(f"Server {server_id} received message from {message['id']}")
+        logger.debug(f"Server {server_id} received message from {message['id']}")
 
+        state = server_state.get_state()
+        if state['is_down']:
+            continue
+
+        updated = algorithm.process_message(message)
+
+        if updated:
+            algo_state = algorithm.get_internal_state()
             state = server_state.get_state()
-            if state['is_down']:
-                continue
+            message = format_message({**state, **algo_state})
+            logging.info(f"Server {serverID} is sending state update to controller")
+            controller_connection.send_state(message)
 
-            updated = algorithm.process_message(message)
-
-            if updated:
-                algo_state = algorithm.get_internal_state()
+        # let the controller know we are done
+        if algorithm.is_done():
+            if not signaled_controller:
+                logging.info(f"Server {serverID} letting controller know they are done")
                 state = server_state.get_state()
+                algo_state = algorithm.get_internal_state()
                 message = format_message({**state, **algo_state})
-                logging.info(f"Server {serverID} is sending state update to controller")
                 controller_connection.send_state(message)
-
-            # let the controller know we are done
-            if algorithm.is_done():
-                if not signaled_controller:
-                    logging.info(f"Server {serverID} letting controller know they are done")
-                    state = server_state.get_state()
-                    algo_state = algorithm.get_internal_state()
-                    message = format_message({**state, **algo_state})
-                    controller_connection.send_state(message)
-                    signaled_controller = True
+                signaled_controller = True
 
     bcastListenSocket.close()
     logging.info(f"Server {serverID} is exiting process_message")
