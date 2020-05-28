@@ -238,7 +238,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 continue
             try:
                 message = json.loads(final_data.decode('utf-8'))
-                logging.info(f"Server {server_id} received message from {message['id']}: {message}")
+                # logging.info(f"Server {server_id} received message from {message['id']}: {message}")
             except json.decoder.JSONDecodeError:
                 logging.exception(f"Server {server_id} encountered error parsing "
                                   f"JSON: {final_data.decode('utf-8').strip()}")
