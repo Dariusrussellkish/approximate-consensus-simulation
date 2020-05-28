@@ -201,6 +201,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     global params
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
+    final_message = None
 
     started = False
     while not started:
@@ -261,8 +262,10 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
                     if not signaled_controller:
                         message = format_message({**state, **algo_state})
-                        logging.info(f"Server {serverID} is sending state update to controller")
-                        controller_connection.send_state(message)
+                    else:
+                        message = final_message
+                    logging.info(f"Server {serverID} is sending state update to controller")
+                    controller_connection.send_state(message)
 
             # let the controller know we are done
         if algorithm.is_done():
@@ -273,6 +276,7 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 message = format_message({**state, **algo_state})
                 controller_connection.send_state(message)
                 signaled_controller = True
+                final_message = message
 
 
 def process_message(algorithm, server_state, controller_connection, server_id, bcastsocket):
