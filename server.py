@@ -378,8 +378,6 @@ if __name__ == "__main__":
 
     server_state = ServerState(serverID)
     algorithm = ApproximateConsensusAlgorithm(params, serverID)
-    controller_connection = ControllerConnection(params, serverID)
-    logger.info(f"Server {serverID} connected with controller")
 
     bcastSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
@@ -396,9 +394,11 @@ if __name__ == "__main__":
 
         sockets = connect_to_tcp_servers(sockets, serverID)
         sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets, serverID)
-
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
+
+        controller_connection = ControllerConnection(params, serverID)
+        logger.info(f"Server {serverID} connected with controller")
 
         messageProcessor = threading.Thread(target=process_messages_tcp,
                                             args=(algorithm, server_state, controller_connection,
@@ -408,6 +408,8 @@ if __name__ == "__main__":
         watch_threads.append(messageProcessor)
 
     else:
+        controller_connection = ControllerConnection(params, serverID)
+        logger.info(f"Server {serverID} connected with controller")
         serverBCast = threading.Thread(target=periodic_broadcast,
                                        args=(algorithm, server_state, serverID, bcastSocket), name="serverBCast")
         serverBCast.start()
