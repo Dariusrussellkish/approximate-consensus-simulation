@@ -221,14 +221,17 @@ def process_server_states():
 
             # check if all the servers are done (or permanently down)
             if all(doneServers):
-                for ip in params["server_ips"]:
-                    if ip not in downedServers:
-                        # send crash command to server, which will make it end
-                        logging.info(f"Controller sending CRASH to {ip}")
-                        connection = sockets[ip]
-                        message = format_message(False, True, isPermanent=True)
-                        connection.sendall(message)
-                break
+                try:
+                    for ip in params["server_ips"]:
+                        if ip not in downedServers:
+                            # send crash command to server, which will make it end
+                            logging.info(f"Controller sending CRASH to {ip}")
+                            connection = sockets[ip]
+                            message = format_message(False, True, isPermanent=True)
+                            connection.settimeout(0.5)
+                            connection.sendall(message)
+                except socket.timeout:
+                    break
         finally:
             doneServersLock.release()
 
