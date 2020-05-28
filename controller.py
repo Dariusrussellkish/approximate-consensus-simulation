@@ -169,7 +169,7 @@ def unreliable_server(ip, server_id, byzantine, connection):
     return True
 
 
-def process_server_states():
+def process_server_states(faulty_servers):
     """
     Process incoming server state messages
     """
@@ -204,7 +204,7 @@ def process_server_states():
         received_time = int(round(time.time() * 1000))
         serverStates[message["id"]].append({**message, 'time_received': received_time})
 
-        if 'converged' in message and message['converged']:
+        if 'converged' in message and message['converged'] and ip not in faulty_servers:
             if not convergedServers[message['id']]:
                 logging.info(f"Controller received converged message from {message['id']}")
             convergedServers[message['id']] = True
@@ -268,9 +268,10 @@ if __name__ == "__main__":
             logging.info(f"Permanently Downed servers are: {downedServers}")
             byzantineServers = []
 
+        faulty_servers = downedServers + byzantineServers
         sockets = {}
 
-        controllerListener = threading.Thread(target=process_server_states)
+        controllerListener = threading.Thread(target=process_server_states, args=(faulty_servers,))
         controllerListener.start()
 
         logging.info(f"Controller will wait for servers to connect")
