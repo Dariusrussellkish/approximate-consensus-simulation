@@ -49,7 +49,7 @@ class AlgorithmTwo:
             if sum(self.R) >= self.nServers - self.f:
                 values = __filter_list__(self.values)
                 if any([v > self.eps/2. for v in values]):
-                    self.v = sum(self.values)
+                    self.v = sum(values)
                     self.v = self.v / float(sum(self.R))
                 else:
                     self.converged = True
