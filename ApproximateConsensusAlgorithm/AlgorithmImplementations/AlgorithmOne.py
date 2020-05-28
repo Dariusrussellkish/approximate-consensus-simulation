@@ -37,7 +37,7 @@ class AlgorithmOne:
 
     def process_message(self, message):
         s_id = message['id']
-        if self.R[s_id] == 0:
+        if self.R[s_id] is None:
             self.R[s_id] = message['v']
             values = __filter_list__(self.R)
             if len(values) >= self.nServers - self.f:
