@@ -256,12 +256,13 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
                 updated = algorithm.process_message(message)
 
                 if updated:
-                    algo_state = algorithm.get_internal_state()
-                    state = server_state.get_state()
-                    broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
-                    message = format_message({**state, **algo_state})
-                    logging.info(f"Server {serverID} is sending state update to controller")
-                    controller_connection.send_state(message)
+                    if not signaled_controller:
+                        algo_state = algorithm.get_internal_state()
+                        state = server_state.get_state()
+                        broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
+                        message = format_message({**state, **algo_state})
+                        logging.info(f"Server {serverID} is sending state update to controller")
+                        controller_connection.send_state(message)
 
             # let the controller know we are done
         if algorithm.is_done():
@@ -318,11 +319,12 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
         updated = algorithm.process_message(message)
 
         if updated:
-            algo_state = algorithm.get_internal_state()
-            state = server_state.get_state()
-            message = format_message({**state, **algo_state})
-            logging.info(f"Server {serverID} is sending state update to controller")
-            controller_connection.send_state(message)
+            if not signaled_controller:
+                algo_state = algorithm.get_internal_state()
+                state = server_state.get_state()
+                message = format_message({**state, **algo_state})
+                logging.info(f"Server {serverID} is sending state update to controller")
+                controller_connection.send_state(message)
 
         # let the controller know we are done
         if algorithm.is_done():
