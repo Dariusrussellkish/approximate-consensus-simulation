@@ -205,6 +205,11 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
             started = True
     logger.info(f"Server {server_id} starting")
 
+    algo_state = algorithm.get_internal_state()
+    state = server_state.get_state()
+    message = format_message({**state, **algo_state})
+    logging.info(f"Server {serverID} is sending state update to controller")
+    controller_connection.send_state(message)
     messages = {s: b'' for s in sockets.values()}
     message_queue = defaultdict(lambda: defaultdict(list))
     broadcast_tcp(algorithm, server_state, server_id, sockets, updated=True)
@@ -272,7 +277,11 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
     signaled_controller = False
 
     logger.info(f"Server {server_id} starting to process broadcast messages")
-
+    algo_state = algorithm.get_internal_state()
+    state = server_state.get_state()
+    message = format_message({**state, **algo_state})
+    logging.info(f"Server {serverID} is sending state update to controller")
+    controller_connection.send_state(message)
     while not server_state.is_finished():
         try:
             bcastListenSocket.settimeout(0.5)
