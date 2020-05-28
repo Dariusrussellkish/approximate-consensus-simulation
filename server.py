@@ -265,6 +265,12 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
     signaled_controller = False
 
     logger.info(f"Server {server_id} starting to process broadcast messages")
+    started = False
+    while not started:
+        state = server_state.get_state()
+        if not state['is_down']:
+            started = True
+    logger.info(f"Server {server_id} starting")
 
     while not server_state.is_finished():
         try:
