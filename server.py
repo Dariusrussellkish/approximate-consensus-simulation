@@ -198,13 +198,6 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
-    started = False
-    while not started:
-        state = server_state.get_state()
-        if not state['is_down']:
-            started = True
-    logger.info(f"Server {server_id} starting")
-
     algo_state = algorithm.get_internal_state()
     state = server_state.get_state()
     message = format_message({**state, **algo_state})
@@ -435,7 +428,6 @@ if __name__ == "__main__":
                                             args=(algorithm, server_state, controller_connection, serverID, bcastSocket),
                                             name="messageProcessor")
         messageProcessor.start()
-
 
         ready_message = format_message({'id': serverID, 'ready': True})
         controller_connection.mark_ready(ready_message)
