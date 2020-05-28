@@ -41,7 +41,7 @@ class AlgorithmOne:
             self.R[s_id] = message['v']
             values = __filter_list__(self.R)
             if len(values) >= self.nServers - self.f:
-                if any([v > self.eps/2. for v in values]):
+                if any([abs(self.v - v) > self.eps/2. for v in values]):
                     self.v = (max(values) + min(values)) / 2.0
                 else:
                     self.converged = True

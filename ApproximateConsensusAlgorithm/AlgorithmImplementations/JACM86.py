@@ -88,7 +88,7 @@ class AlgorithmJACM86:
         if len(filtered_R) >= self.nServers - self.f:
             if self.p <= self.p_end:
                 values = __trim__(filtered_R, self.f)
-                if any([v > self.eps/2. for v in values]):
+                if any([abs(self.v - v) > self.eps/2. for v in values]):
                     self.v = (max(values) + min(values)) / 2
                 else:
                     self.converged = True

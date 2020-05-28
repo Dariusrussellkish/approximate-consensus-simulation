@@ -48,7 +48,7 @@ class AlgorithmTwo:
             self.values[s_id] = v
             if sum(self.R) >= self.nServers - self.f:
                 values = __filter_list__(self.values)
-                if any([v > self.eps/2. for v in values]):
+                if any([abs(self.v - v) > self.eps/2. for v in values]):
                     self.v = sum(values)
                     self.v = self.v / float(sum(self.R))
                 else:
