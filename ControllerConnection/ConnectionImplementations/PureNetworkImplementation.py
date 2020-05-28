@@ -57,3 +57,6 @@ class PureNetworkImplementation:
 
     def send_state(self, message):
         self.controller_socket.sendto(message, (self.controller_ip, self.controller_port))
+
+    def mark_ready(self, message):
+        self.controller_socket.sendto(message, (self.controller_ip, self.controller_port))

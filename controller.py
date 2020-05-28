@@ -1,6 +1,7 @@
 import json
 import logging, logging.handlers
 import pickle
+import select
 import socket
 import sys
 import threading
@@ -292,6 +293,36 @@ if __name__ == "__main__":
 
         logging.info(f"Controller has connected to all servers")
 
+        logging.info(f"Controller is waiting to all servers to mark READY")
+        messages = {s: b'' for s in sockets.values()}
+        ready_messages = [False for _ in range(params['servers'])]
+        while not all(ready_messages):
+            rtr, _, _ = select.select(list(sockets.values()), [], [], 0.1)
+            for r_socket in rtr:
+                try:
+                    final_data = b''
+                    data = r_socket.recv(1024-len(messages[r_socket]))
+                    if not data:
+                        continue
+                    messages[r_socket] += data
+                    if len(messages[r_socket]) == 1024:
+                        final_data = messages[r_socket]
+                        messages[r_socket] = b''
+                    if not final_data:
+                        continue
+                except ConnectionResetError:
+                    continue
+                try:
+                    message = json.loads(final_data.decode('utf-8'))
+                    # logging.info(f"Server {server_id} received message from {message['id']}: {message}")
+                except json.decoder.JSONDecodeError:
+                    logging.exception(f"Server {server_id} encountered error parsing "
+                                      f"JSON: {final_data.decode('utf-8').strip()}")
+                    raise json.decoder.JSONDecodeError
+                if 'ready' in message and message['ready']:
+                    ready_messages[message['id']] = True
+
+        logging.info(f"Controller has received READY from all servers")
         # send command to all servers to go up
         first_started_time = int(round(time.time() * 1000))
         for ip in params["server_ips"]:

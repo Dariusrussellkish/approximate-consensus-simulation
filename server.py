@@ -390,6 +390,9 @@ if __name__ == "__main__":
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     bcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
+    controller_connection = ControllerConnection(params, serverID)
+    logger.info(f"Server {serverID} connected with controller")
+
     sockets = {}
     watch_threads = []
 
@@ -403,9 +406,9 @@ if __name__ == "__main__":
         sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets, serverID)
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
-
-        controller_connection = ControllerConnection(params, serverID)
-        logger.info(f"Server {serverID} connected with controller")
+        
+        ready_message = format_message({'id': serverID, 'ready': True})
+        controller_connection.mark_ready(ready_message)
 
         messageProcessor = threading.Thread(target=process_messages_tcp,
                                             args=(algorithm, server_state, controller_connection,
@@ -415,8 +418,6 @@ if __name__ == "__main__":
         watch_threads.append(messageProcessor)
 
     else:
-        controller_connection = ControllerConnection(params, serverID)
-        logger.info(f"Server {serverID} connected with controller")
         serverBCast = threading.Thread(target=periodic_broadcast,
                                        args=(algorithm, server_state, serverID, bcastSocket), name="serverBCast")
         serverBCast.start()
@@ -425,6 +426,11 @@ if __name__ == "__main__":
                                             args=(algorithm, server_state, controller_connection, serverID, bcastSocket),
                                             name="messageProcessor")
         messageProcessor.start()
+
+
+        ready_message = format_message({'id': serverID, 'ready': True})
+        controller_connection.mark_ready(ready_message)
+
         watch_threads.append(serverBCast)
         watch_threads.append(messageProcessor)
 

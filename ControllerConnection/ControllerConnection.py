@@ -36,3 +36,6 @@ class ControllerConnection:
 
     def cleanup(self):
         self.implementation.cleanup()
+
+    def mark_ready(self, message):
+        self.implementation.mark_ready(message)
