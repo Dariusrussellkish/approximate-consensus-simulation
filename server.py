@@ -394,8 +394,6 @@ if __name__ == "__main__":
     watch_threads = []
 
     if algorithm.requires_synchronous_update_broadcast:
-        controller_connection = ControllerConnection(params, serverID)
-        logger.info(f"Server {serverID} connected with controller")
         broadcast_tcp_r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         broadcast_tcp_r.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         broadcast_tcp_r.bind(("0.0.0.0", params["server_port"]))
@@ -405,6 +403,9 @@ if __name__ == "__main__":
         sockets = receive_connection_tcp_servers(broadcast_tcp_r, sockets, serverID)
         logger.info(f"Server {serverID} has connected to all other servers")
         logger.info(f"{list(sockets.keys())}")
+
+        controller_connection = ControllerConnection(params, serverID)
+        logger.info(f"Server {serverID} connected with controller")
 
         messageProcessor = threading.Thread(target=process_messages_tcp,
                                             args=(algorithm, server_state, controller_connection,
