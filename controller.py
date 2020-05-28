@@ -189,7 +189,7 @@ def process_server_states():
 
         # in some testing the server also picks up the UP/DOWN messages
         # so this filters them out (if server and controller share IP)
-        if "id" not in message:
+        if "id" not in message or 'ready' in message:
             continue
 
         logging.info(f"Controller received state update from {message['id']}, it is now in phase {message['p']}")
