@@ -207,7 +207,7 @@ def process_server_states():
             if message['converged']:
                 convergedServers[message['id']] = True
                 logging.info(f"Controller received converged message from {message['id']}")
-            if all(convergedServers):
+            if len(convergedServers) >= params['servers'] - params['f']:
                 serverStates['p_agreement'] = {'time': message['time_generated'], 'phase': message['p']}
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
