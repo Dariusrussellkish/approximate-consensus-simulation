@@ -40,7 +40,7 @@ class AlgorithmTwo:
             self.R[s_id] = 1
             self.v += v
             if sum(self.R) >= self.nServers - self.f:
-                self.v = self.v / sum(self.R)
+                self.v = self.v / float(sum(self.R))
                 self.p += 1
                 self._reset()
                 AlgorithmTwo.logger.info(
