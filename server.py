@@ -469,6 +469,17 @@ if __name__ == "__main__":
     controllerListener.start()
     watch_threads.append(controllerListener)
 
+    # while not server_state.is_finished():
+    #     for t in watch_threads:
+    #         if not t.is_alive() and not server_state.is_finished():
+    #             logging.fatal(f"Server {serverID} crashed in thread {t.name}")
+    #             server_state.lock.acquire()
+    #             try:
+    #                 server_state.is_done = True
+    #             finally:
+    #                 server_state.lock.release()
+    #     time.sleep(1)
+
     main_thread = threading.currentThread()
     for t in threading.enumerate():
         if t is not main_thread:
