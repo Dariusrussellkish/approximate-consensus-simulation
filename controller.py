@@ -209,10 +209,11 @@ def process_server_states():
                 logging.info(f"Controller received converged message from {message['id']}")
             if len(convergedServers) >= params['servers'] - params['f']:
                 serverStates['p_agreement'] = {'time': message['time_generated'], 'phase': message['p']}
+
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
-                for dserver in doneServers:
-                    doneServers[dserver] = True
+                    for dserver in doneServers:
+                        doneServers[dserver] = True
 
         doneServersLock.acquire()
         try:
