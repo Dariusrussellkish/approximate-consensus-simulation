@@ -285,6 +285,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
     bcastListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     bcastListenSocket.bind(("", params["server_port"]))
     signaled_controller = False
+    final_message = None
 
     logger.info(f"Server {server_id} starting to process broadcast messages")
     algo_state = algorithm.get_internal_state()
@@ -326,7 +327,10 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
             if not signaled_controller:
                 algo_state = algorithm.get_internal_state()
                 state = server_state.get_state()
-                message = format_message({**state, **algo_state})
+                if not signaled_controller:
+                    message = format_message({**state, **algo_state})
+                else:
+                    message = final_message
                 logging.info(f"Server {serverID} is sending state update to controller")
                 controller_connection.send_state(message)
 
@@ -339,6 +343,7 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
                 message = format_message({**state, **algo_state})
                 controller_connection.send_state(message)
                 signaled_controller = True
+                final_message = message
 
     bcastListenSocket.close()
     logging.info(f"Server {serverID} is exiting process_message")
