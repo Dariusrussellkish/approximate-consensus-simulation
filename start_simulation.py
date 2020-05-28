@@ -62,7 +62,7 @@ def start_simulation(params):
                   f"{unique} {k} > logs/controller.out 2>&1 &")
 
         for i in range(params["servers"]):
-            time.sleep(0.5)
+            time.sleep(0.05)
             print(f"Starting server {i} on ip: {hs[i+2].IP}")
             hs[i+2].cmd(f"python3 ~/approximate-consensus-simulation/server.py "
                         f"{sys.argv[1]} {i} > logs/server_{i}.out 2>&1 &")
