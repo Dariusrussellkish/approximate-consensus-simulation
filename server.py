@@ -198,6 +198,14 @@ def process_messages_tcp(algorithm, server_state, controller_connection, server_
     logger.info(f"Server {server_id} starting to process broadcast messages")
     signaled_controller = False
 
+    started = False
+    while not started:
+        state = server_state.get_state()
+        if not state['is_down']:
+            started = True
+        else:
+            time.sleep(0.1)
+
     algo_state = algorithm.get_internal_state()
     state = server_state.get_state()
     message = format_message({**state, **algo_state})
