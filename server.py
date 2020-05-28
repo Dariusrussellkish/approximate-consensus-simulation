@@ -138,6 +138,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state, 'updated': updated})
     retry_sockets = {}
+    retry_count = {s: 0 for s in s_sockets.values()}
     for s in s_sockets.values():
         try:
             s.settimeout(0.1)
@@ -157,6 +158,8 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
         retry_sockets_list = list(retry_sockets.keys())
         for s in retry_sockets_list:
             retry_sockets.pop(s)
+            if retry_count[s] > 5:
+                continue
             try:
                 s.settimeout(0.1)
                 if algorithm.supports_byzantine() and state['is_byzantine']:
@@ -169,6 +172,7 @@ def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
             except socket.timeout:
                 logger.info(f"Server {server_id} timed out sending to {s.getpeername()} adding it to retry")
                 retry_sockets[s] = True
+                retry_count[s] += 1
             except IOError:
                 pass
 
