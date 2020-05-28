@@ -38,8 +38,10 @@ serverStates = {}
 for i in range(params["servers"]):
     serverStates[i] = []
 
-doneServers = [False for _ in range(params["servers"])]
+doneServers = [False for _ in range(params['servers'])]
 readyServers = [False for _ in range(params['servers'])]
+convergedServers = [False for _ in range(params['servers'])]
+
 
 def format_message(isByzantine, isDown, isPermanent=False):
     """
@@ -171,7 +173,7 @@ def process_server_states():
     """
     Process incoming server state messages
     """
-    global params, serverStates, readyServers
+    global params, serverStates, readyServers, convergedServers
     controllerListenSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)  # UDP
     controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     controllerListenSocket.bind(("", params["controller_port"]))
@@ -202,29 +204,14 @@ def process_server_states():
         serverStates[message["id"]].append({**message, 'time_received': received_time})
 
         if not 'p_agreement' in serverStates:
-            min_v = params['K']
-            max_v = 0
-            servers_to_check = list(serverStates.keys())
-            p = message['p']
-            seen = 0
-            for server in servers_to_check:
-                if not serverStates[server]:
-                    continue
-                for phase in serverStates[server]:
-                    value = phase['v']
-                    if phase['p'] == p:
-                        if value < min_v:
-                            min_v = value
-                        if value > max_v:
-                            max_v = value
-                        seen += 1
-                    if max_v - min_v <= params['eps'] and seen >= params['servers'] - params['f']:
-                        serverStates['p_agreement'] = {'time': phase['time_generated'], 'phase': phase['p']}
-                        logging.info(f"Controller saw p agreement")
-                        if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
-                            logging.info(f"Controller is terminating servers by p agreement")
-                            for dserver in doneServers:
-                                doneServers[dserver] = True
+            if message['converged']:
+                convergedServers[message['id']] = True
+            if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
+                logging.info(f"Controller is terminating servers by p agreement")
+                for dserver in doneServers:
+                    doneServers[dserver] = True
+            if all(convergedServers):
+                serverStates['p_agreement'] = {'time': message['time_generated'], 'phase': message['p']}
 
         doneServersLock.acquire()
         try:

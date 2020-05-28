@@ -1,6 +1,11 @@
 import logging
 from numpy import random, log, ceil
 
+def __filter_list__(to_filter, remove=None):
+    if remove is None:
+        remove = [None]
+    return list(x for x in to_filter if x not in remove)
+
 
 class AlgorithmOne:
     logger = logging.getLogger('Algo-1')
@@ -18,6 +23,7 @@ class AlgorithmOne:
         self.eps = eps
         self.p_end = log(eps / K) / log(float(f) / (servers - f))
         self.requires_synchronous_update_broadcast = True
+        self.converged = False
         self._reset()
         AlgorithmOne.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
@@ -26,15 +32,19 @@ class AlgorithmOne:
         return self.p > self.p_end
 
     def _reset(self):
-        self.R = [0. for _ in range(self.nServers)]
+        self.R = list([None for _ in range(self.nServers)])
         self.R[self.server_id] = self.v
 
     def process_message(self, message):
         s_id = message['id']
         if self.R[s_id] == 0:
             self.R[s_id] = message['v']
-            if sum([ceil(x) for x in self.R]) >= self.nServers - self.f:
-                self.v = (max(self.R) + min(self.R)) / 2.0
+            values = __filter_list__(self.R)
+            if len(values) >= self.nServers - self.f:
+                if any([v > self.eps/2. for v in values]):
+                    self.v = (max(values) + min(values)) / 2.0
+                else:
+                    self.converged = True
                 self.p += 1
                 self._reset()
                 AlgorithmOne.logger.info(
@@ -46,5 +56,6 @@ class AlgorithmOne:
         return {
             'v': self.v,
             'p': self.p,
-            'phase': self.phase
+            'phase': self.phase,
+            'converged': self.converged
         }

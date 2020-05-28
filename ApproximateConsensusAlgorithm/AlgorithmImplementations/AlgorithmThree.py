@@ -38,6 +38,7 @@ class AlgorithmThree:
         self.f = f
         self.eps = eps
         self._reset()
+        self.converged = False
         self.supports_byzantine = servers > 5 * f
         self.a = 1 - (1.0 / (2**servers))
         self.p_end = log(eps / K) / log(self.a)
@@ -50,7 +51,8 @@ class AlgorithmThree:
         self.S = list([None for _ in range(self.nServers)])
 
     def is_done(self):
-        return self.p > self.p_end
+        # This is just for benchmarking
+        return self.converged
 
     def process_message(self, message):
         s_id = message['id']
@@ -63,14 +65,20 @@ class AlgorithmThree:
         filtered_S = __filter_list__(self.S)
         if len(filtered_R) + len(filtered_S) >= self.nServers - self.f:
             union = __not_none_union__(filtered_R, filtered_S)
-            self.v = __mean_trim__(union, self.f)
+            if any([v > self.eps/2. for v in union]):
+                self.v = __mean_trim__(union, self.f)
+            else:
+                self.converged = True
             self.p += 1
             self._reset()
             AlgorithmThree.logger.info(f"Server {self.server_id} accepting update via mean trim, phase is now {self.p}")
             return True
 
         if len(filtered_S) >= 2 * self.f + 1:
-            self.v = __mean_trim__(filtered_S, self.f)
+            if any([v > self.eps/2. for v in filtered_S]):
+                self.v = __mean_trim__(filtered_S, self.f)
+            else:
+                self.converged = True
             self.p += 1
             self._reset()
             AlgorithmThree.logger.info(f"Server {self.server_id} accepting update S, phase is now {self.p}")
@@ -81,5 +89,6 @@ class AlgorithmThree:
     def get_internal_state(self):
         return {
             'v': self.v,
-            'p': self.p
+            'p': self.p,
+            'converged': self.converged
         }

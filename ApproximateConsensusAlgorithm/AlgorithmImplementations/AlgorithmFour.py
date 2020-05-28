@@ -41,6 +41,7 @@ class AlgorithmFour:
         self.eps = eps
         self._reset()
         self.isDone = False
+        self.converged = False
 
     def _reset(self):
         self.w = None
@@ -84,6 +85,7 @@ class AlgorithmFour:
                 self.v = values[0]
                 if len(list(x for x in values if x == self.v)) >= self.f + 1:
                     self.isDone = True
+                    self.converged = True
             else:
                 self.v = __flip_coin__()
             self.p += 1
@@ -97,5 +99,6 @@ class AlgorithmFour:
         return {
             'v': self.v,
             'p': int(self.p),
-            'w': self.w
+            'w': self.w,
+            'converged': self.converged
         }

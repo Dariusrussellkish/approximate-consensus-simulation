@@ -50,6 +50,7 @@ class AlgorithmJACM86:
         self.eps = eps
         self.done_servers = [False for _ in range(servers)]
         self.done_values = [None for _ in range(servers)]
+        self.converged = False
         self.supports_byzantine = servers > 5 * f
         self.p_end = log(eps / K) / log(0.5)
         self.phase = 1
@@ -87,7 +88,10 @@ class AlgorithmJACM86:
         if len(filtered_R) >= self.nServers - self.f:
             if self.p <= self.p_end:
                 values = __trim__(filtered_R, self.f)
-                self.v = (max(values) + min(values)) / 2
+                if any([v > self.eps/2. for v in values]):
+                    self.v = (max(values) + min(values)) / 2
+                else:
+                    self.converged = True
                 self.p += 1
                 self.R[self.p][self.server_id] = self.v
                 AlgorithmJACM86.logger.info(
@@ -100,5 +104,6 @@ class AlgorithmJACM86:
             "v": self.v,
             "p": self.p,
             "phase": self.phase,
-            "algorithm_is_done": self.is_done()
+            "algorithm_is_done": self.is_done(),
+            "converged": self.converged
         }

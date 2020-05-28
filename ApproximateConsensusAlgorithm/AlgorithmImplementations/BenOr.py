@@ -44,6 +44,7 @@ class AlgorithmBenOr:
         self._reset()
         self.requires_synchronous_update_broadcast = True
         self.isDone = False
+        self.converged = False
 
     def _reset(self):
         self.R = list([None for _ in range(self.nServers)])
@@ -124,6 +125,7 @@ class AlgorithmBenOr:
                 self.v = values[0]
                 if len(list(x for x in self.S if x == self.v)) > self.f:
                     self.isDone = True
+                    self.converged = True
             else:
                 self.v = __flip_coin__()
             self.phase = 1
@@ -139,5 +141,6 @@ class AlgorithmBenOr:
             "phase": self.phase,
             "v": self.v,
             "p": self.p,
-            "w": self.w
+            "w": self.w,
+            "converged": self.converged
         }
