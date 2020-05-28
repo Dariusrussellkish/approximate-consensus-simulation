@@ -200,22 +200,26 @@ def process_server_states():
             min_v = params['K']
             max_v = 0
             servers_to_check = list(serverStates.keys())
+            p = message['p']
+            seen = 0
             for server in servers_to_check:
                 if not serverStates[server]:
                     continue
-                value = serverStates[server][-1]['v']
-                if value < min_v:
-                    min_v = value
-                if value > max_v:
-                    max_v = value
-
-                if max_v - min_v <= params['eps']:
-                    serverStates['p_agreement'] = serverStates[server][-1]
-                    logging.info(f"Controller saw p agreement")
-                    if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
-                        logging.info(f"Controller is terminating servers by p agreement")
-                        for dserver in doneServers:
-                            doneServers[dserver] = True
+                for phase in serverStates[server]:
+                    value = phase['v']
+                    if phase['p'] == p:
+                        if value < min_v:
+                            min_v = value
+                        if value > max_v:
+                            max_v = value
+                        seen += 1
+                    if max_v - min_v <= params['eps'] and seen >= params['servers'] - params['f']:
+                        serverStates['p_agreement'] = {'time': phase['time_generated'], 'phase': phase['p']}
+                        logging.info(f"Controller saw p agreement")
+                        if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
+                            logging.info(f"Controller is terminating servers by p agreement")
+                            for dserver in doneServers:
+                                doneServers[dserver] = True
 
         doneServersLock.acquire()
         try:
