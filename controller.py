@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
         # pick which servers will be down
         servers = params["server_ips"]
-        downedServers = random.choice(servers, params["f"], replace=False)
+        downedServers = list(random.choice(servers, params["f"], replace=False))
         if algorithm.supports_byzantine():
             logging.info(f"Byzantine servers are: {downedServers}")
             byzantineServers = downedServers
@@ -268,7 +268,7 @@ if __name__ == "__main__":
             logging.info(f"Permanently Downed servers are: {downedServers}")
             byzantineServers = []
 
-        faulty_servers = downedServers + byzantineServers
+        faulty_servers = [*downedServers, *byzantineServers]
         sockets = {}
 
         controllerListener = threading.Thread(target=process_server_states, args=(faulty_servers,))
