@@ -205,8 +205,9 @@ def process_server_states():
         serverStates[message["id"]].append({**message, 'time_received': received_time})
 
         if 'converged' in message and message['converged']:
+            if not convergedServers[message['id']]:
+                logging.info(f"Controller received converged message from {message['id']}")
             convergedServers[message['id']] = True
-            logging.info(f"Controller received converged message from {message['id']}")
 
         if 'p_agreement' not in serverStates:
             if sum(convergedServers) >= params['servers'] - params['f']:
