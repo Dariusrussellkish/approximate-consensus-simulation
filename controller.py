@@ -204,7 +204,7 @@ def process_server_states(faulty_servers):
         received_time = int(round(time.time() * 1000))
         serverStates[message["id"]].append({**message, 'time_received': received_time})
 
-        if 'converged' in message and message['converged'] and ip not in faulty_servers:
+        if 'converged' in message and message['converged'] and message['id'] not in faulty_servers:
             if not convergedServers[message['id']]:
                 logging.info(f"Controller received converged message from {message['id']}")
             convergedServers[message['id']] = True
