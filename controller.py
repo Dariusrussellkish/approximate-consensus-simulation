@@ -316,7 +316,7 @@ if __name__ == "__main__":
                     message = json.loads(final_data.decode('utf-8'))
                     # logging.info(f"Server {server_id} received message from {message['id']}: {message}")
                 except json.decoder.JSONDecodeError:
-                    logging.exception(f"Server {server_id} encountered error parsing "
+                    logging.exception(f"Controller encountered error parsing "
                                       f"JSON: {final_data.decode('utf-8').strip()}")
                     raise json.decoder.JSONDecodeError
                 if 'ready' in message and message['ready']:
