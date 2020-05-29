@@ -376,7 +376,7 @@ def connect_to_tcp_servers(sockets, server_id):
     for i in range(0, server_id):
         ip = params['server_ips'][i]
 
-        time.sleep(float(random.rand()) / 2.)
+        time.sleep(float(random.rand()))
         logging.info(f"Server {serverID} trying to connect with {ip}")
         broadcast_tcp_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         broadcast_tcp_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
@@ -470,16 +470,16 @@ if __name__ == "__main__":
     controllerListener.start()
     watch_threads.append(controllerListener)
 
-    # while not server_state.is_finished():
-    #     for t in watch_threads:
-    #         if not t.is_alive() and not server_state.is_finished():
-    #             logging.fatal(f"Server {serverID} crashed in thread {t.name}")
-    #             server_state.lock.acquire()
-    #             try:
-    #                 server_state.is_done = True
-    #             finally:
-    #                 server_state.lock.release()
-    #     time.sleep(1)
+    while not server_state.is_finished():
+        for t in watch_threads:
+            if not t.is_alive() and not server_state.is_finished():
+                logging.fatal(f"Server {serverID} crashed in thread {t.name}")
+                server_state.lock.acquire()
+                try:
+                    server_state.is_done = True
+                finally:
+                    server_state.lock.release()
+        time.sleep(1)
 
     main_thread = threading.currentThread()
     for t in threading.enumerate():

@@ -73,9 +73,9 @@ def get_wait_time(isDown, shape=3, scale=2):
     if wait > 10:
         wait = 10
     if isDown:
-        wait = interp(wait, (0, 10), (0, 0.5))
+        wait = interp(wait, (0, 10), (0, 1))
     else:
-        wait = interp(wait, (0, 10), (0, 4.5))
+        wait = interp(wait, (0, 10), (0, 10))
     return wait
 
 
@@ -85,8 +85,8 @@ def downed_server(ip, server_id, connection):
     """
     global params
     try:
-        # wait_time = get_wait_time(True)
-        # time.sleep(wait_time + 2)
+        wait_time = get_wait_time(True)
+        time.sleep(wait_time)
         message = format_message(False, True, isPermanent=True)
         assert len(message) <= 1024
         connection.sendall(message)
