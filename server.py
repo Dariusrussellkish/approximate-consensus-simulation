@@ -344,9 +344,9 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
                 state = server_state.get_state()
                 algo_state = algorithm.get_internal_state()
                 message = format_message({**state, **algo_state})
-                for _ in range(10):
+                for _ in range(20):
                     controller_connection.send_state(message)
-                    time.sleep(0.01)
+                    time.sleep(0.05)
                 signaled_controller = True
                 final_message = message
 

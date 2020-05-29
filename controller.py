@@ -204,16 +204,22 @@ def process_server_states(faulty_servers):
         received_time = int(round(time.time() * 1000))
         serverStates[message["id"]].append({**message, 'time_received': received_time})
 
-        if 'converged' in message and message['converged'] and message['id'] not in faulty_servers:
-            if not convergedServers[message['id']]:
-                logging.info(f"Controller received converged message from {message['id']}")
-            convergedServers[message['id']] = True
+        # if 'converged' in message and message['converged'] and message['id'] not in faulty_servers:
+        #     if not convergedServers[message['id']]:
+        #         logging.info(f"Controller received converged message from {message['id']}")
+        #     convergedServers[message['id']] = True
 
         if 'p_agreement' not in serverStates:
-            if sum(convergedServers) >= params['servers'] - params['f']:
-                logging.info(f"Controller received converged message from n-f servers, marking convergence")
-                serverStates['p_agreement'] = {'time': message['time_generated'], 'phase': message['p']}
-
+            values = []
+            times = []
+            phases = []
+            for server in serverStates:
+                if server not in faulty_servers:
+                    times.append(serverStates[server][-1]['time_generated'])
+                    values.append(serverStates[server][-1]['v'])
+                    phases.append(serverStates[server][-1]['p'])
+            if max(values) - min(values) <= params['eps']:
+                serverStates['p_agreement'] = {'time': max(times), 'phase': max(phases)}
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
                     for dserver in doneServers:
@@ -336,6 +342,7 @@ if __name__ == "__main__":
                     "params": params,
                     "first_start_time": first_started_time,
                     "all_start_time": all_started_time,
+                    "faulty_servers": faulty_servers
                 }, fh
             )
         # shutil.copytree("logs", f"data/{basepath}/logs_{unique}_{sys.argv[3]}")
