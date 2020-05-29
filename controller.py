@@ -214,11 +214,11 @@ def process_server_states(faulty_servers):
             times = []
             phases = []
             for server in serverStates:
-                if server not in faulty_servers:
+                if server not in faulty_servers and serverStates[server]:
                     times.append(serverStates[server][-1]['time_generated'])
                     values.append(serverStates[server][-1]['v'])
                     phases.append(serverStates[server][-1]['p'])
-            if max(values) - min(values) <= params['eps']:
+            if len(values) >= params['servers'] - params['f'] and max(values) - min(values) <= params['eps']:
                 serverStates['p_agreement'] = {'time': max(times), 'phase': max(phases)}
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
