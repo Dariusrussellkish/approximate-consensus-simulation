@@ -70,8 +70,8 @@ class AlgorithmThree:
                 self.v = __mean_trim__(union, self.f)
             else:
                 self.converged = True
-            AlgorithmThree.logger.info(f"Server {self.server_id} R: {self.R}")
-            AlgorithmThree.logger.info(f"Server {self.server_id} S: {self.S}")
+            # AlgorithmThree.logger.info(f"Server {self.server_id} R: {self.R}")
+            # AlgorithmThree.logger.info(f"Server {self.server_id} S: {self.S}")
             self.p += 1
             self._reset()
             AlgorithmThree.logger.info(f"Server {self.server_id} accepting update via mean trim, phase is now {self.p}")
@@ -82,8 +82,8 @@ class AlgorithmThree:
                 self.v = __mean_trim__(filtered_S, self.f)
             else:
                 self.converged = True
-            AlgorithmThree.logger.info(f"Server {self.server_id} R: {self.R}")
-            AlgorithmThree.logger.info(f"Server {self.server_id} S: {self.S}")
+            # AlgorithmThree.logger.info(f"Server {self.server_id} R: {self.R}")
+            # AlgorithmThree.logger.info(f"Server {self.server_id} S: {self.S}")
             self.p += 1
             self._reset()
             AlgorithmThree.logger.info(f"Server {self.server_id} accepting update S, phase is now {self.p}")
