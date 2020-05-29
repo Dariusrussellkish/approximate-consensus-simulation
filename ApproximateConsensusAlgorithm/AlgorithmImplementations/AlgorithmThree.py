@@ -63,28 +63,33 @@ class AlgorithmThree:
 
         filtered_R = __filter_list__(self.R)
         filtered_S = __filter_list__(self.S)
+        should_update = False
         if len(filtered_R) + len(filtered_S) >= self.nServers - self.f:
             union = __not_none_union__(filtered_R, filtered_S)
             if any([abs(self.v - v) > self.eps/2. for v in union]):
                 self.v = __mean_trim__(union, self.f)
             else:
                 self.converged = True
+            AlgorithmThree.logger.info(f"Server {self.server_id} R: {self.R}")
+            AlgorithmThree.logger.info(f"Server {self.server_id} S: {self.S}")
             self.p += 1
             self._reset()
             AlgorithmThree.logger.info(f"Server {self.server_id} accepting update via mean trim, phase is now {self.p}")
-            return True
+            should_update = True
 
         if len(filtered_S) >= 2 * self.f + 1:
-            if any([v > self.eps/2. for v in filtered_S]):
+            if any([abs(self.v - v) > self.eps/2. for v in filtered_S]):
                 self.v = __mean_trim__(filtered_S, self.f)
             else:
                 self.converged = True
+            AlgorithmThree.logger.info(f"Server {self.server_id} R: {self.R}")
+            AlgorithmThree.logger.info(f"Server {self.server_id} S: {self.S}")
             self.p += 1
             self._reset()
             AlgorithmThree.logger.info(f"Server {self.server_id} accepting update S, phase is now {self.p}")
-            return True
+            should_update = True
 
-        return False
+        return should_update
 
     def get_internal_state(self):
         return {
