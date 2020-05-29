@@ -39,19 +39,24 @@ class PureNetworkImplementation:
             pass
 
     def get_data(self):
+        received = b''
         try:
-            self.controller_listen_socket.settimeout(0.5)
-            data = self.controller_listen_socket.recv(1024)
+            while len(received) < 1024:
+                self.controller_listen_socket.settimeout(0.5)
+                data = self.controller_listen_socket.recv(1024)
+                if not data:
+                    continue
+                received += data
         except socket.timeout:
             raise ControllerTimeoutError
-        if not data:
+        if not received:
             raise DataNotPresentError
         try:
-            message = json.loads(data.decode('utf-8'))
+            message = json.loads(received.decode('utf-8'))
         except json.decoder.JSONDecodeError:
             PureNetworkImplementation.logger.exception(
                 f"Server {self.server_id} encountered exception trying to process "
-                f"JSON: '{data.decode('utf-8').strip()}'")
+                f"JSON: '{received.decode('utf-8').strip()}'")
             raise DataNotPresentError
         return message
 
