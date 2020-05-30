@@ -117,19 +117,20 @@ def broadcast(algorithm, server_state, server_id, bcastSocket):
     algo_state = algorithm.get_internal_state()
     message = format_message({**state, **algo_state})
 
+    bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
     # if not state['is_down']:
     #     logger.debug(f"Server {server_id} is broadcasting and isByzantine is {state['is_byzantine']}")
 
-    if algorithm.supports_byzantine() and not state['is_down'] and state['is_byzantine']:
-        for ip in params["server_ips"]:
-            # flip (biased) coin if we will send to server
-            if random.rand() > params["byzantine_send_p"]:
-                # logger.debug(f"Server {serverID} is broadcasting to {ip}")
-                bcastSocket.sendto(message, (ip, params["server_port"]))
-
-    # if we are not byzantine or down, broadcast to all
-    elif not state['is_down']:
-        bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
+    # if algorithm.supports_byzantine() and not state['is_down'] and state['is_byzantine']:
+    #     for ip in params["server_ips"]:
+    #         # flip (biased) coin if we will send to server
+    #         if random.rand() > params["byzantine_send_p"]:
+    #             # logger.debug(f"Server {serverID} is broadcasting to {ip}")
+    #             bcastSocket.sendto(message, (ip, params["server_port"]))
+    #
+    # # if we are not byzantine or down, broadcast to all
+    # elif not state['is_down']:
+    #     bcastSocket.sendto(message, ('<broadcast>', params["server_port"]))
 
 
 def broadcast_tcp(algorithm, server_state, server_id, s_sockets, updated=False):
@@ -320,9 +321,9 @@ def process_message(algorithm, server_state, controller_connection, server_id, b
 
         logger.debug(f"Server {server_id} received message from {message['id']}")
 
-        state = server_state.get_state()
-        if state['is_down']:
-            continue
+        # state = server_state.get_state()
+        # if state['is_down']:
+        #     continue
 
         updated = algorithm.process_message(message)
 
