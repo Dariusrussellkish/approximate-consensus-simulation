@@ -141,6 +141,12 @@ def unreliable_server(ip, server_id, byzantine, connection):
             # logging.info(f"Controller sent {'down' if isDown else 'up'} command to {ip}")
             if byzantine and not isByzantine:
                 isByzantine = random.rand() < params["byzantine_p"]
+                if isByzantine:
+                    doneServersLock.acquire()
+                    try:
+                        doneServers[server_id] = True
+                    finally:
+                        doneServersLock.release()
                 message = format_message(True, isDown)
             elif isByzantine:
                 message = format_message(True, isDown)
