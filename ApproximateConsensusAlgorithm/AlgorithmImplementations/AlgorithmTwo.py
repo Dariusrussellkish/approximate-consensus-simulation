@@ -23,9 +23,6 @@ class AlgorithmTwo:
         self._reset()
         self.p_end = log(eps / K) / log(float(f) / (servers - f))
         self.converged = False
-        # TODO: Remove, only for testing against algorithm 1
-        self.requires_synchronous_update_broadcast = True
-        self.phase = 1
         AlgorithmTwo.logger.info(
             f"Server {self.server_id} will terminate after {self.p_end} phases")
 
@@ -64,7 +61,5 @@ class AlgorithmTwo:
         return {
             'v': self.v,
             'p': self.p,
-            'converged': self.converged,
-            # TODO: remove, only for testing against AC
-            'phase': self.phase
+            'converged': self.converged
         }

@@ -23,7 +23,7 @@ class SimulationTopo(Topo):
         switch = self.addSwitch('s%s' % 1)
         for i in range(params["servers"] + 2):
             host = self.addHost('h%s' % (i + 1))
-            self.addLink(host, switch)
+            self.addLink(host, switch, delay='100ms')
 
 
 def start_mini(params):
