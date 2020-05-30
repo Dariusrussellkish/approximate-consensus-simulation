@@ -223,6 +223,8 @@ def process_server_states(faulty_servers):
         phases = []
         for server in serverStates:
             if server not in faulty_servers and serverStates[server]:
+                if server == 'p_agreement':
+                    continue
                 if serverStates[server][-1]['p'] == message['p']:
                     times.append(serverStates[server][-1]['time_generated'])
                     values.append(serverStates[server][-1]['v'])
