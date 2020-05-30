@@ -21,7 +21,10 @@ class AlgorithmOne:
         self.supports_byzantine = False
         self.has_valid_n = servers > 2 * f
         self.eps = eps
-        self.p_end = log(eps / K) / log(float(f) / (servers - f))
+        if f > 0:
+            self.p_end = log(eps / K) / log(float(f) / (servers - f))
+        else:
+            self.p_end = 1
         self.requires_synchronous_update_broadcast = True
         self.converged = False
         self._reset()

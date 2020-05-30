@@ -9,21 +9,26 @@ from mininet.log import setLogLevel
 from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.util import dumpNodeConnections
-
+from mininet.node import CPULimitedHost
+from mininet.link import TCLink
 
 class SimulationTopo(Topo):
     """
         build a Mininet topology with one switch,
         and each host is connected to the switch.
     """
-
     def build(self):
         with open(sys.argv[1], 'r') as fh:
             params = json.load(fh)
-        switch = self.addSwitch('s%s' % 1)
-        for i in range(params["servers"] + 2):
-            host = self.addHost('h%s' % (i + 1))
-            self.addLink(host, switch, delay='100ms')
+        n = params["servers"]
+        switch = self.addSwitch('s1')
+        for h in range(n + 2):
+            # Each host gets 50%/n of system CPU
+            host = self.addHost('h%s' % (h + 1),
+                                cpu=.8 / n)
+            # 10 Mbps, 5ms delay, no packet loss
+            self.addLink(host, switch, delay='5ms')
+
 
 
 def start_mini(params):
@@ -34,7 +39,7 @@ def start_mini(params):
 
     setLogLevel('info')
     topo = SimulationTopo()
-    net = Mininet(topo=topo)
+    net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink,)
     net.addNAT().configDefault()
     net.start()
     # net.pingAll()
