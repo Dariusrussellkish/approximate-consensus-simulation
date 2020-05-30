@@ -64,5 +64,7 @@ class AlgorithmTwo:
         return {
             'v': self.v,
             'p': self.p,
-            'converged': self.converged
+            'converged': self.converged,
+            # TODO: remove, only for testing against AC
+            'phase': self.phase
         }
