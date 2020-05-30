@@ -119,8 +119,6 @@ def unreliable_server(ip, server_id, byzantine, connection):
                 doneServersLock.acquire()
                 try:
                     done = doneServers[server_id]
-                except socket.error:
-                    break
                 finally:
                     doneServersLock.release()
 
@@ -172,6 +170,7 @@ def unreliable_server(ip, server_id, byzantine, connection):
     except:
         logging.exception(f"Controller encountered exception in unreliable server {server_id}")
     finally:
+        logging.info(f"Controller is shutting down server {server_id}")
         connection.close()
     return True
 
@@ -243,8 +242,8 @@ def process_server_states(faulty_servers):
             if phases_after_p_agreement > 10:
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
-                for dserver in doneServers:
-                    doneServers[dserver] = True
+                    for dserver in doneServers:
+                        doneServers[dserver] = True
 
         doneServersLock.acquire()
         try:
@@ -252,6 +251,7 @@ def process_server_states(faulty_servers):
                 logging.info(f"Controller received DONE from {message['id']}, done servers are {doneServers}")
                 doneServers[message['id']] = True
 
+            logging.info(f"Controller, done servers are {doneServers}")
             # check if all the servers are done (or permanently down)
             if all(doneServers) and not signaled_servers:
                 for ip in params["server_ips"]:
