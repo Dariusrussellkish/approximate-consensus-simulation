@@ -244,9 +244,9 @@ def process_server_states(faulty_servers):
                     logging.info(f"Controller is terminating servers by p agreement")
                     doneServersLock.acquire()
                     try:
-                        for dserver in doneServers:
-                            logging.info(f"Controller is terminating {dserver}")
-                            doneServers[dserver] = True
+                        for i, dserver in enumerate(doneServers):
+                            logging.info(f"Controller is terminating {i}")
+                            doneServers[i] = True
                     finally:
                         doneServersLock.release()
 
