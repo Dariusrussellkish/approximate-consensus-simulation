@@ -52,7 +52,7 @@ class AlgorithmThree:
 
     def is_done(self):
         # This is just for benchmarking
-        return self.converged or self.p > 35
+        return self.p > self.p_end / 4.
 
     def process_message(self, message):
         s_id = message['id']
