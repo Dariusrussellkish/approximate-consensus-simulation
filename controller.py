@@ -178,6 +178,7 @@ def process_server_states(faulty_servers):
     controllerListenSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     controllerListenSocket.bind(("", params["controller_port"]))
     signaled_servers = False
+    phases_after_p_agreement = 0
 
     while True:
         try:
@@ -209,21 +210,32 @@ def process_server_states(faulty_servers):
         #         logging.info(f"Controller received converged message from {message['id']}")
         #     convergedServers[message['id']] = True
 
-        if 'p_agreement' not in serverStates:
-            values = []
-            times = []
-            phases = []
-            for server in serverStates:
-                if server not in faulty_servers and serverStates[server]:
+        
+        values = []
+        times = []
+        phases = []
+        for server in serverStates:
+            if server not in faulty_servers and serverStates[server]:
+                if serverStates[server][-1]['p'] == message['p']:
                     times.append(serverStates[server][-1]['time_generated'])
                     values.append(serverStates[server][-1]['v'])
                     phases.append(serverStates[server][-1]['p'])
-            if len(values) >= params['servers'] - params['f'] and max(values) - min(values) <= params['eps']:
-                serverStates['p_agreement'] = {'time': max(times), 'phase': max(phases)}
+        if len(values) >= params['servers'] - params['f'] and max(values) - min(values) <= params['eps'] and 'p_agreement' not in serverStates:
+            serverStates['p_agreement'] = {'time': max(times), 'phase': max(phases)}
+            phases_after_p_agreement = 0
+            logging.info(f"Controller found agreement at phase {message['p']}")
+        elif 'p_agreement' in serverStates and max(values) - min(values) > params['eps']:
+            phases_after_p_agreement = 0
+            serverStates.pop('p_agreement')
+            logging.info(f"Controller resetting agreement at phase {message['p']} due to divergence")
+        elif 'p_agreement' in serverStates:
+            logging.info(f"Controller incrementing phases after p_agreement")
+            phases_after_p_agreement += 1
+            if phases_after_p_agreement > 10:
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
-                    for dserver in doneServers:
-                        doneServers[dserver] = True
+                for dserver in doneServers:
+                    doneServers[dserver] = True
 
         doneServersLock.acquire()
         try:
