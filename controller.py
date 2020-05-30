@@ -242,8 +242,13 @@ def process_server_states(faulty_servers):
             if phases_after_p_agreement > 10:
                 if 'terminate_on_p_agreement' in params and params['terminate_on_p_agreement']:
                     logging.info(f"Controller is terminating servers by p agreement")
-                    for dserver in doneServers:
-                        doneServers[dserver] = True
+                    doneServersLock.acquire()
+                    try:
+                        for dserver in doneServers:
+                            logging.info(f"Controller is terminating {dserver}")
+                            doneServers[dserver] = True
+                    finally:
+                        doneServersLock.release()
 
         doneServersLock.acquire()
         try:
@@ -257,10 +262,13 @@ def process_server_states(faulty_servers):
                 for ip in params["server_ips"]:
                     if ip not in downedServers:
                         # send crash command to server, which will make it end
-                        logging.info(f"Controller sending CRASH to {ip}")
-                        connection = sockets[ip]
-                        message = format_message(False, True, isPermanent=True)
-                        connection.sendall(message)
+                        try:
+                            logging.info(f"Controller sending CRASH to {ip}")
+                            connection = sockets[ip]
+                            message = format_message(False, True, isPermanent=True)
+                            connection.sendall(message)
+                        except:
+                            break
                 signaled_servers = True
                 break
         finally:
