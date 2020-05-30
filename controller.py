@@ -256,7 +256,6 @@ def process_server_states(faulty_servers):
                 logging.info(f"Controller received DONE from {message['id']}, done servers are {doneServers}")
                 doneServers[message['id']] = True
 
-            logging.info(f"Controller, done servers are {doneServers}")
             # check if all the servers are done (or permanently down)
             if all(doneServers) and not signaled_servers:
                 for ip in params["server_ips"]:
