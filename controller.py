@@ -144,6 +144,7 @@ def unreliable_server(ip, server_id, byzantine, connection):
                 if isByzantine:
                     doneServersLock.acquire()
                     try:
+                        logging.info(f"Controller marking {server_id} as byzantine and done")
                         doneServers[server_id] = True
                     finally:
                         doneServersLock.release()
